@@ -48,7 +48,6 @@ fun main() {
                 .withTerminationConfig(
                     TerminationConfig().apply {
                         unimprovedSecondsSpentLimit = 3L
-                        bestScoreLimit = "0hard/0soft"
                     }
                 )
         )

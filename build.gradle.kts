@@ -44,9 +44,12 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
+
+gradle.startParameter.isParallelProjectExecutionEnabled = true
 
 noArg {
     annotation("org.optaplanner.core.api.domain.solution.PlanningSolution")
