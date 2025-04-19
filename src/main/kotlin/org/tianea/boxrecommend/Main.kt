@@ -9,7 +9,7 @@ import org.optaplanner.core.api.domain.solution.PlanningSolution
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider
 import org.optaplanner.core.api.domain.variable.PlanningVariable
-import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScore
+import org.optaplanner.core.api.score.buildin.bendable.BendableScore
 import org.optaplanner.core.api.score.stream.Constraint
 import org.optaplanner.core.api.score.stream.ConstraintCollectors.sum
 import org.optaplanner.core.api.score.stream.ConstraintFactory
@@ -63,6 +63,21 @@ fun main() {
     result.assignments.forEach {
         println("Item ${it.item.id} -> Bin ${it.bin?.id} | Rotation: ${it.rotation} | X: ${it.x}, Y: ${it.y}, Z: ${it.z}")
     }
+
+    val bendableScore = result.score
+    println("=== 점수 해석 ===")
+    println("Hard Score:")
+    bendableScore.hardScores().forEachIndexed { i, score ->
+        val purpose = ConstraintPurpose.fromIndex(i, true)
+        println(" - ${purpose?.description ?: "Hard[$i]"}: $score")
+    }
+
+    println("Soft Score:")
+    bendableScore.softScores().forEachIndexed { i, score ->
+        val purpose = ConstraintPurpose.fromIndex(i, false)
+        println(" - ${purpose?.description ?: "Soft[$i]"}: $score")
+    }
+
     println("Score: ${result.score}")
     result.assignments.groupBy { it.bin }
         .forEach { bin, assignments -> printXYProjection(assignments, bin!!) }
@@ -176,8 +191,8 @@ class BinPackingSolution(
     @ValueRangeProvider(id = "rotationRange")
     val rotationRange: List<Rotation> = Rotation.entries,
 
-    @PlanningScore
-    var score: HardSoftScore = HardSoftScore.ZERO
+    @PlanningScore(bendableHardLevelsSize = 2, bendableSoftLevelsSize = 3)
+    var score: BendableScore = BendableScore.zero(2, 3)
 )
 
 class BinPackingConstraintProvider : ConstraintProvider {
@@ -195,7 +210,7 @@ class BinPackingConstraintProvider : ConstraintProvider {
         return factory.forEach(ItemAssignment::class.java)
             .filter { it.bin != null }
             .groupBy({ it.bin }) // one entry per used bin
-            .penalize(HardSoftScore.ofSoft(1))
+            .penalize(ConstraintPurpose.BIN_COUNT.score(1))
             .asConstraint("Minimize number of bins used")
     }
 
@@ -203,13 +218,13 @@ class BinPackingConstraintProvider : ConstraintProvider {
         return factory.forEach(ItemAssignment::class.java)
             .groupBy({ it.bin }, sum { it ->
                 val (w, h, l) = it.rotatedDimensions()
-                (w * h * l).toInt()
+                it.item.shape.volume(w, h, l).toInt()
             })
             .filter { bin, totalSize ->
                 val effectiveCapacity = (bin!!.width * bin.height * bin.length * (1.0 - bin.buffer)).toLong()
                 totalSize > effectiveCapacity
             }
-            .penalize(HardSoftScore.ONE_HARD)
+            .penalize(ConstraintPurpose.PHYSICAL_CONSTRAINT.score(1))
             .asConstraint("Bin capacity exceeded")
     }
 
@@ -219,7 +234,7 @@ class BinPackingConstraintProvider : ConstraintProvider {
             .filter { bin, totalWeight ->
                 totalWeight > (bin?.maxWeight ?: 0)
             }
-            .penalize(HardSoftScore.ONE_HARD)
+            .penalize(ConstraintPurpose.WEIGHT_CONSTRAINT.score(1))
             .asConstraint("Bin weight limit exceeded")
     }
 
@@ -254,7 +269,7 @@ class BinPackingConstraintProvider : ConstraintProvider {
                         (ay < by + scaledBh) && (ay + scaledAh > by) &&
                         (az < bz + scaledBl) && (az + scaledAl > bz)
             }
-            .penalize(HardSoftScore.ONE_HARD)
+            .penalize(ConstraintPurpose.PHYSICAL_CONSTRAINT.score(1))
             .asConstraint("Items must not overlap")
     }
 
@@ -281,7 +296,7 @@ class BinPackingConstraintProvider : ConstraintProvider {
                         y + scaledH > (bin.height * (1.0 - bin.buffer)).toLong() ||
                         z + scaledL > (bin.length * (1.0 - bin.buffer)).toLong()
             }
-            .penalize(HardSoftScore.ONE_HARD)
+            .penalize(ConstraintPurpose.PHYSICAL_CONSTRAINT.score(1))
             .asConstraint("Item must fit within bin bounds")
     }
 }
@@ -306,6 +321,56 @@ enum class Shape {
 
             CONE -> Triple(1.15, 1.15, 1.15)
             POUCH -> Triple(1.05, 1.05, 1.05)
+        }
+    }
+
+    fun volume(width: Long, height: Long, length: Long): Double {
+        return when (this) {
+            BOX -> width * height * length.toDouble()
+            CYLINDER -> {
+                val radius = width.coerceAtMost(length) / 2.0
+                Math.PI * radius * radius * height
+            }
+
+            CONE -> {
+                val radius = width.coerceAtMost(length) / 2.0
+                (1.0 / 3.0) * Math.PI * radius * radius * height
+            }
+
+            POUCH -> width * height * length * 0.8
+        }
+    }
+}
+
+enum class ConstraintPurpose(
+    val level: Int,
+    val isHard: Boolean = false,
+    val description: String,
+) {
+    PHYSICAL_CONSTRAINT(0, true, "물리 제약 위반 (겹침, 공간 초과 등)"),
+    WEIGHT_CONSTRAINT(1, true, "무게 제한 초과"),
+    BIN_COUNT(0, false, "사용된 박스 수 최소화"),
+    WASTED_VOLUME(1, false, "빈 공간 최소화"),
+    STACK_STABILITY(2, false, "무거운 물건은 아래에"),
+    ;
+
+    val isSoft = isHard.not()
+
+    companion object {
+        val HARD_LEVELS = entries.count { it.isHard }
+        val SOFT_LEVELS = entries.count { it.isSoft }
+
+        fun fromIndex(index: Int, isHard: Boolean): ConstraintPurpose =
+            entries.firstOrNull { it.level == index && it.isHard == isHard }
+                ?: error("No ConstraintPurpose found for index=$index and isHard=$isHard")
+    }
+
+
+    fun score(value: Int): BendableScore {
+        return if (isHard) {
+            BendableScore.ofHard(HARD_LEVELS, SOFT_LEVELS, level, value)
+        } else {
+            BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS, level, value)
         }
     }
 }
