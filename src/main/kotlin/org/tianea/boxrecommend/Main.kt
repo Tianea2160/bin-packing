@@ -65,18 +65,22 @@ fun main() {
     }
 
     val bendableScore = result.score
-    println("=== 점수 해석 ===")
-    println("Hard Score:")
-    bendableScore.hardScores().forEachIndexed { i, score ->
-        val purpose = ConstraintPurpose.fromIndex(i, true)
-        println(" - ${purpose?.description ?: "Hard[$i]"}: $score")
-    }
-
-    println("Soft Score:")
-    bendableScore.softScores().forEachIndexed { i, score ->
-        val purpose = ConstraintPurpose.fromIndex(i, false)
-        println(" - ${purpose?.description ?: "Soft[$i]"}: $score")
-    }
+    println(buildString {
+        appendLine("=== 점수 해석 ===")
+        ConstraintPurpose.entries
+            .groupBy { it.isHard }
+            .forEach { (isHard, purposes) ->
+                appendLine(if (isHard) "Hard Score:" else "Soft Score:")
+                purposes.sortedBy { it.level }.forEach { purpose ->
+                    val scoreValue = if (purpose.isHard) {
+                        bendableScore.hardScore(purpose.level)
+                    } else {
+                        bendableScore.softScore(purpose.level)
+                    }
+                    appendLine(" - ${purpose.description}: $scoreValue")
+                }
+            }
+    })
 
     println("Score: ${result.score}")
     result.assignments.groupBy { it.bin }
