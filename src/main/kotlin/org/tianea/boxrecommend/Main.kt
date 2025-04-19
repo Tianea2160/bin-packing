@@ -17,10 +17,9 @@ import org.optaplanner.core.api.score.stream.ConstraintProvider
 import org.optaplanner.core.api.solver.SolverFactory
 import org.optaplanner.core.config.solver.SolverConfig
 import org.optaplanner.core.config.solver.termination.TerminationConfig
-import java.time.Duration
 
 
-fun main(args: Array<String>) {
+fun main() {
     val items = listOf(
         Item(1, width = 1, height = 3, length = 3, shape = Shape.BOX),
         Item(2, width = 1, height = 1, length = 3, shape = Shape.BOX),
@@ -29,10 +28,12 @@ fun main(args: Array<String>) {
         Item(5, width = 3, height = 1, length = 1, shape = Shape.BOX),
         Item(6, width = 1, height = 3, length = 1, shape = Shape.BOX),
         Item(7, width = 1, height = 1, length = 3, shape = Shape.BOX),
+        Item(8, width = 1, height = 1, length = 3, shape = Shape.BOX),
     )
 
     val bins = listOf(
         Bin(1, width = 3, height = 3, length = 3, buffer = 0.0),
+        Bin(2, width = 3, height = 3, length = 3, buffer = 0.0),
     )
     val assignments = items.mapIndexed { idx, item -> ItemAssignment(id = idx, item = item) }
 
@@ -44,13 +45,12 @@ fun main(args: Array<String>) {
                 .withSolutionClass(BinPackingSolution::class.java)
                 .withEntityClasses(ItemAssignment::class.java)
                 .withConstraintProviderClass(BinPackingConstraintProvider::class.java)
-                .withTerminationSpentLimit(Duration.ofSeconds(5))
                 .withTerminationConfig(
-                    TerminationConfig()
-                        .run {
-                            this.bestScoreLimit = "0hard/0soft"
-                            this
-                        })
+                    TerminationConfig().apply {
+                        unimprovedSecondsSpentLimit = 3L
+                        bestScoreLimit = "0hard/0soft"
+                    }
+                )
         )
 
     val solver = solverFactory.buildSolver()
@@ -65,7 +65,8 @@ fun main(args: Array<String>) {
         println("Item ${it.item.id} -> Bin ${it.bin?.id} | Rotation: ${it.rotation} | X: ${it.x}, Y: ${it.y}, Z: ${it.z}")
     }
     println("Score: ${result.score}")
-    printXYProjection(result.assignments, bins.first())
+    result.assignments.groupBy { it.bin }
+        .forEach { bin, assignments -> printXYProjection(assignments, bin!!) }
 }
 
 data class Item(
@@ -186,8 +187,17 @@ class BinPackingConstraintProvider : ConstraintProvider {
             binCapacityExceeded(factory),
             binWeightLimitExceeded(factory),
             noOverlap(factory),
-            itemMustFitInBin(factory)
+            itemMustFitInBin(factory),
+            minimizeBinUsage(factory)
         )
+    }
+
+    fun minimizeBinUsage(factory: ConstraintFactory): Constraint {
+        return factory.forEach(ItemAssignment::class.java)
+            .filter { it.bin != null }
+            .groupBy({ it.bin }) // one entry per used bin
+            .penalize(HardSoftScore.ofSoft(1))
+            .asConstraint("Minimize number of bins used")
     }
 
     fun binCapacityExceeded(factory: ConstraintFactory): Constraint {
