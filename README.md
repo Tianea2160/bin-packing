@@ -60,6 +60,11 @@ Bin 1 [XY 평면 @ Z=1]
 |   |   |   |
 ```
 
+## 예시 출력(JavaFX)
+<img width="912" alt="스크린샷 2025-04-20 오전 9 13 14" src="https://github.com/user-attachments/assets/cdc613f3-9628-4e34-a73b-9d6765a4b070" />
+
+item과 bin의 크기에 따라서 사이즈 코드 수정 필요
+
 ## 테스트
 
 ```shell
