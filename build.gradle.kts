@@ -25,6 +25,7 @@ dependencies {
 
     implementation("org.openjfx:javafx-controls:$javafxVersion:mac-aarch64")
     implementation("org.openjfx:javafx-graphics:$javafxVersion:mac-aarch64")
+    implementation("org.openjfx:javafx-fxml:${javafxVersion}")
     testImplementation("org.optaplanner:optaplanner-test:10.0.0")
     implementation("org.optaplanner:optaplanner-core:10.0.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
