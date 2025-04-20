@@ -18,20 +18,24 @@ class BinPackingSolution(
     val bins: List<Bin>,
 
     @ValueRangeProvider(id = "xRange")
-    val xRange: List<Long> = (0L until (bins.maxOfOrNull { it.width } ?: 10L)).toList(),
+    private val xRange: List<Long> = (0L until (bins.maxOfOrNull { it.width } ?: 10L)).toList(),
 
     @ValueRangeProvider(id = "yRange")
-    val yRange: List<Long> = (0L until (bins.maxOfOrNull { it.height } ?: 10L)).toList(),
+    private val yRange: List<Long> = (0L until (bins.maxOfOrNull { it.height } ?: 10L)).toList(),
 
     @ValueRangeProvider(id = "zRange")
-    val zRange: List<Long> = (0L until (bins.maxOfOrNull { it.length } ?: 10L)).toList(),
+    private val zRange: List<Long> = (0L until (bins.maxOfOrNull { it.length } ?: 10L)).toList(),
 
     @ValueRangeProvider(id = "rotationRange")
-    val rotationRange: List<Rotation> = Rotation.entries,
+    private val rotationRange: List<Rotation> = Rotation.entries,
 
     @PlanningScore(bendableHardLevelsSize = 2, bendableSoftLevelsSize = 3)
     var score: BendableScore = BendableScore.zero(
         ConstraintPurpose.Companion.HARD_LEVELS,
         ConstraintPurpose.Companion.SOFT_LEVELS
     )
-)
+) {
+    fun isFeasible(): Boolean = this.score.isFeasible
+
+    fun isNotFeasible(): Boolean = !isFeasible()
+}

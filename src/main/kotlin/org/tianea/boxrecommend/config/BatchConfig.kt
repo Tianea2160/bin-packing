@@ -127,7 +127,13 @@ class BatchConfig(
         solverFactory: SolverFactory<BinPackingSolution>
     ): ItemProcessor<BinPackingSolution, BinPackingSolution> = ItemProcessor { solution ->
         val solver = solverFactory.buildSolver()
-        solver.solve(solution)
+        val result = solver.solve(solution)
+        if (result.isNotFeasible()) {
+            val scoreDetail = result.score.toShortString()
+            logger.warn("BinPacking 실패 - 해결 불가능한 해입니다. Score: $scoreDetail")
+            throw IllegalStateException("불가능한 조합입니다. 해결할 수 없습니다. (score=$scoreDetail)")
+        }
+        result
     }
 
     @Bean
