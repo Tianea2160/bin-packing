@@ -1,12 +1,12 @@
 package org.tianea.boxrecommend.config
 
 import org.junit.jupiter.api.Test
+import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.test.JobLauncherTestUtils
 import org.springframework.batch.test.context.SpringBatchTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.batch.core.BatchStatus
 import kotlin.test.assertEquals
 
 @SpringBatchTest
@@ -18,8 +18,12 @@ class BatchConfigTest {
     private lateinit var jobLauncherTestUtils: JobLauncherTestUtils
 
     @Test
-    fun `binPackingJob 이 성공적으로 수행되는지 확인`() {
-        val jobExecution = jobLauncherTestUtils.launchJob()
+    fun `binPackingStep이 성공적으로 수행되어야 한다`() {
+        val jobExecution = jobLauncherTestUtils.launchStep("binPackingStep")
         assertEquals(BatchStatus.COMPLETED, jobExecution.status)
+        jobExecution.stepExecutions.forEach { stepExecution ->
+            println("read count : ${stepExecution.readCount}")
+            println("write count : ${stepExecution.writeCount}")
+        }
     }
 }
