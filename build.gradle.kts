@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.noarg") version "1.9.25"
+    id("org.jetbrains.kotlin.plugin.jpa") version "1.9.25"
 }
 
 
@@ -28,6 +29,7 @@ dependencies {
     implementation("org.openjfx:javafx-base:$javafxVersion:mac-aarch64")
     implementation("org.optaplanner:optaplanner-core:10.0.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

@@ -82,3 +82,22 @@ CREATE TABLE BATCH_JOB_EXECUTION_CONTEXT
 CREATE SEQUENCE BATCH_STEP_EXECUTION_SEQ MAXVALUE 9223372036854775807 NO CYCLE;
 CREATE SEQUENCE BATCH_JOB_EXECUTION_SEQ MAXVALUE 9223372036854775807 NO CYCLE;
 CREATE SEQUENCE BATCH_JOB_SEQ MAXVALUE 9223372036854775807 NO CYCLE;
+
+TRUNCATE public.sku;
+
+INSERT INTO sku (sku_id, name, width, height, length, weight, price)
+VALUES
+    (1, 'A SKU', 3, 3, 1, 1, 1),
+    (2, 'B SKU', 3, 1, 1, 1, 1),
+    (3, 'C SKU', 3, 1, 1, 1, 1),
+    (4, 'D SKU', 3, 1, 1, 1, 1),
+    (5, 'E SKU', 1, 1, 3, 1, 1),
+    (6, 'F SKU', 1, 3, 1, 1, 1),
+    (7, 'G SKU', 3, 1, 1, 1, 1);
+
+TRUNCATE box;
+
+INSERT INTO box (box_id, name, width, height, length, weight)
+VALUES
+    (1, 'Q BOX', 3, 3, 3, 1),
+    (2, 'W BOX', 3, 3, 3, 1);

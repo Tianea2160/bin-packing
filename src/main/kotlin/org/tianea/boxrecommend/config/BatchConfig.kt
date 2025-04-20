@@ -26,6 +26,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.tianea.boxrecommend.core.constraint.BinPackingConstraintProvider
+import org.tianea.boxrecommend.core.logging.TransactionLoggingChunkListener
 import org.tianea.boxrecommend.core.vo.*
 
 fun buildXYProjectionLog(assignments: List<ItemAssignment>, bin: Bin) = buildString {
@@ -90,7 +91,9 @@ enum class ConstraintPurpose(
 
 @Configuration
 @EnableBatchProcessing
-class BatchConfig {
+class BatchConfig(
+    private val transactionLoggingChunkListener: TransactionLoggingChunkListener,
+) {
     private val logger = LoggerFactory.getLogger(BatchConfig::class.java)
 
     @Bean("solverFactory")
@@ -163,8 +166,11 @@ class BatchConfig {
         .reader(binPackingItemReader)
         .processor(binPackingItemProcessor)
         .writer(binPackingItemWriter)
+        .listener(transactionLoggingChunkListener)
+        .faultTolerant()
+        .retry(Exception::class.java)
+        .retryLimit(3)
         .build()
-
 
     @Bean
     fun binPackingJob(

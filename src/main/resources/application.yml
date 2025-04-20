@@ -8,6 +8,8 @@ spring:
     name: box-recommend
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: create-drop
   data:
     jdbc:
       dialect: postgresql
