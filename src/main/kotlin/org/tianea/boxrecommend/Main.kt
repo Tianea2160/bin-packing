@@ -152,7 +152,6 @@ class Box3DViewer : Application() {
             labeledSphere("Y", 0.0, axisLength, 0.0, Color.GREEN),
             labeledSphere("Z", 0.0, 0.0, axisLength, Color.BLUE)
         )
-        val offset = 150.0 // offset to center the packing visually
 
         solution.bins.forEachIndexed { index, bin ->
             val binOffsetX = index * 300.0
@@ -366,7 +365,7 @@ class BinPackingConstraintProvider : ConstraintProvider {
     fun minimizeBinUsage(factory: ConstraintFactory): Constraint {
         return factory.forEach(ItemAssignment::class.java)
             .filter { it.bin != null }
-            .groupBy({ it.bin }) // one entry per used bin
+            .groupBy { it.bin } // one entry per used bin
             .penalize(ConstraintPurpose.BIN_COUNT.score(1))
             .asConstraint("Minimize number of bins used")
     }
@@ -516,10 +515,6 @@ enum class ConstraintPurpose(
     companion object {
         val HARD_LEVELS = entries.count { it.isHard }
         val SOFT_LEVELS = entries.count { it.isSoft }
-
-        fun fromIndex(index: Int, isHard: Boolean): ConstraintPurpose =
-            entries.firstOrNull { it.level == index && it.isHard == isHard }
-                ?: error("No ConstraintPurpose found for index=$index and isHard=$isHard")
     }
 
 
