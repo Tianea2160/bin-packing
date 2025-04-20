@@ -6,10 +6,11 @@ import org.optaplanner.core.api.domain.solution.PlanningSolution
 import org.optaplanner.core.api.domain.solution.ProblemFactCollectionProperty
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider
 import org.optaplanner.core.api.score.buildin.bendable.BendableScore
-import org.tianea.boxrecommend.config.ConstraintPurpose
+import org.tianea.boxrecommend.core.vo.ConstraintPurpose
 
 @PlanningSolution
 class BinPackingSolution(
+    val id: Long,
     @PlanningEntityCollectionProperty
     val assignments: List<ItemAssignment>,
 

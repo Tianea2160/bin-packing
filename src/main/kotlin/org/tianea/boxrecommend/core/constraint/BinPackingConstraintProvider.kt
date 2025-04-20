@@ -4,7 +4,7 @@ import org.optaplanner.core.api.score.stream.Constraint
 import org.optaplanner.core.api.score.stream.ConstraintCollectors.sum
 import org.optaplanner.core.api.score.stream.ConstraintFactory
 import org.optaplanner.core.api.score.stream.ConstraintProvider
-import org.tianea.boxrecommend.config.ConstraintPurpose
+import org.tianea.boxrecommend.core.vo.ConstraintPurpose
 import org.tianea.boxrecommend.core.vo.ItemAssignment
 
 class BinPackingConstraintProvider : ConstraintProvider {
