@@ -2,13 +2,13 @@ package org.tianea.boxrecommend.core
 
 import org.junit.jupiter.api.Test
 import org.optaplanner.test.api.score.stream.ConstraintVerifier
-import org.tianea.boxrecommend.config.Bin
+import org.tianea.boxrecommend.core.vo.Bin
 import org.tianea.boxrecommend.config.BinPackingConstraintProvider
-import org.tianea.boxrecommend.config.BinPackingSolution
-import org.tianea.boxrecommend.config.Item
-import org.tianea.boxrecommend.config.ItemAssignment
-import org.tianea.boxrecommend.config.Rotation
-import org.tianea.boxrecommend.config.Shape
+import org.tianea.boxrecommend.core.vo.BinPackingSolution
+import org.tianea.boxrecommend.core.vo.Item
+import org.tianea.boxrecommend.core.vo.ItemAssignment
+import org.tianea.boxrecommend.core.vo.Rotation
+import org.tianea.boxrecommend.core.vo.Shape
 
 class BinPackingConstraintProviderTest {
     val provider = BinPackingConstraintProvider()
