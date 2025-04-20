@@ -15,4 +15,5 @@ spring:
       dialect: postgresql
   sql:
     init:
-      schema-locations: classpath:/db/init.sql
+      schema-locations: classpath:/db/insert_data.sql
+      mode: always
