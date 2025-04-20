@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/boxrecommend
+    password: test1234
+    username: test1234
+    driver-class-name: org.postgresql.Driver
+  application:
+    name: box-recommend
+  jpa:
+    show-sql: true
+  data:
+    jdbc:
+      dialect: postgresql

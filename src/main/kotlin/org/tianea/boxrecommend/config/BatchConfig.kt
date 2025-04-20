@@ -1,22 +1,20 @@
-package org.tianea.boxrecommend
+package org.tianea.boxrecommend.config
+
+import org.slf4j.LoggerFactory
 
 
 import javafx.application.Application
-import javafx.scene.AmbientLight
-import javafx.scene.Group
-import javafx.scene.Node
-import javafx.scene.PerspectiveCamera
-import javafx.scene.Scene
+import javafx.scene.*
 import javafx.scene.paint.Color
 import javafx.scene.paint.PhongMaterial
 import javafx.scene.shape.Box
 import javafx.scene.shape.CullFace
 import javafx.scene.shape.DrawMode
+import javafx.scene.shape.Sphere
+import javafx.scene.text.Font
+import javafx.scene.text.Text
 import javafx.scene.transform.Rotate
 import javafx.stage.Stage
-import javafx.scene.text.Text
-import javafx.scene.text.Font
-import javafx.scene.shape.Sphere
 import org.optaplanner.core.api.domain.entity.PlanningEntity
 import org.optaplanner.core.api.domain.lookup.PlanningId
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty
@@ -33,79 +31,30 @@ import org.optaplanner.core.api.score.stream.ConstraintProvider
 import org.optaplanner.core.api.solver.SolverFactory
 import org.optaplanner.core.config.solver.SolverConfig
 import org.optaplanner.core.config.solver.termination.TerminationConfig
+import org.springframework.batch.core.Job
+import org.springframework.batch.core.JobParametersBuilder
+import org.springframework.batch.core.Step
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
+import org.springframework.batch.core.job.builder.JobBuilder
+import org.springframework.batch.core.launch.JobLauncher
+import org.springframework.batch.core.launch.support.RunIdIncrementer
+import org.springframework.batch.core.repository.JobRepository
+import org.springframework.batch.core.step.builder.StepBuilder
+import org.springframework.batch.item.ItemProcessor
+import org.springframework.batch.item.ItemReader
+import org.springframework.batch.item.ItemWriter
+import org.springframework.batch.item.support.ListItemReader
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
+import org.springframework.transaction.PlatformTransactionManager
+import org.tianea.boxrecommend.config.ConstraintPurpose.Companion.HARD_LEVELS
+import org.tianea.boxrecommend.config.ConstraintPurpose.Companion.SOFT_LEVELS
 
 var latestResult: BinPackingSolution? = null
 
-fun main() {
-    val items = listOf(
-        Item(1, width = 1, height = 3, length = 3, shape = Shape.BOX),
-        Item(2, width = 1, height = 1, length = 3, shape = Shape.BOX),
-        Item(3, width = 1, height = 1, length = 3, shape = Shape.BOX),
-        Item(4, width = 1, height = 1, length = 3, shape = Shape.BOX),
-        Item(5, width = 3, height = 1, length = 1, shape = Shape.BOX),
-        Item(6, width = 1, height = 3, length = 1, shape = Shape.BOX),
-        Item(7, width = 1, height = 1, length = 3, shape = Shape.BOX),
-        Item(8, width = 1, height = 1, length = 3, shape = Shape.BOX),
-    )
-
-    val bins = listOf(
-        Bin(1, width = 3, height = 3, length = 3, buffer = 0.0),
-        Bin(2, width = 3, height = 3, length = 3, buffer = 0.0),
-    )
-    val assignments = items.mapIndexed { idx, item -> ItemAssignment(id = idx, item = item) }
-
-    val solution = BinPackingSolution(assignments, bins)
-
-    val solverFactory = SolverFactory
-        .create<BinPackingSolution>(
-            SolverConfig()
-                .withSolutionClass(BinPackingSolution::class.java)
-                .withEntityClasses(ItemAssignment::class.java)
-                .withConstraintProviderClass(BinPackingConstraintProvider::class.java)
-                .withTerminationConfig(
-                    TerminationConfig().apply {
-                        unimprovedSecondsSpentLimit = 3L
-                    }
-                )
-        )
-
-    val solver = solverFactory.buildSolver()
-    solver.addEventListener {
-        val cur = it.newBestSolution
-        println(cur.assignments)
-    }
-    val result = solver.solve(solution)
-    latestResult = result
-
-    println("=== 결과 ===")
-    result.assignments.forEach {
-        println("Item ${it.item.id} -> Bin ${it.bin?.id} | Rotation: ${it.rotation} | X: ${it.x}, Y: ${it.y}, Z: ${it.z}")
-    }
-
-    val bendableScore = result.score
-    println(buildString {
-        appendLine("=== 점수 해석 ===")
-        ConstraintPurpose.entries
-            .groupBy { it.isHard }
-            .forEach { (isHard, purposes) ->
-                appendLine(if (isHard) "Hard Score:" else "Soft Score:")
-                purposes.sortedBy { it.level }.forEach { purpose ->
-                    val scoreValue = if (purpose.isHard) {
-                        bendableScore.hardScore(purpose.level)
-                    } else {
-                        bendableScore.softScore(purpose.level)
-                    }
-                    appendLine(" - ${purpose.description}: $scoreValue")
-                }
-            }
-    })
-
-    println("Score: ${result.score}")
-    result.assignments.groupBy { it.bin }
-        .forEach { bin, assignments -> printXYProjection(assignments, bin!!) }
-
-    Application.launch(Box3DViewer::class.java)
-}
 
 class Box3DViewer : Application() {
     override fun start(stage: Stage) {
@@ -296,7 +245,7 @@ data class ItemAssignment(
     }
 }
 
-fun printXYProjection(assignments: List<ItemAssignment>, bin: Bin) {
+fun buildXYProjectionLog(assignments: List<ItemAssignment>, bin: Bin) = buildString {
     val maxZ = assignments.maxOfOrNull { (it.z ?: 0) + it.rotatedDimensions().third } ?: bin.length
     for (z in 0 until maxZ) {
         val grid = Array(bin.height.toInt()) { Array<String?>(bin.width.toInt()) { null } }
@@ -318,11 +267,11 @@ fun printXYProjection(assignments: List<ItemAssignment>, bin: Bin) {
             }
         }
 
-        println("Bin ${bin.id} [XY 평면 @ Z=$z]")
+        appendLine("Bin ${bin.id} [XY 평면 @ Z=$z]")
         for (row in grid.reversed()) {
-            println(row.joinToString(" | ", prefix = "| ", postfix = " |") { it ?: " " })
+            appendLine(row.joinToString(" | ", prefix = "| ", postfix = " |") { it ?: " " })
         }
-        println()
+        appendLine()
     }
 }
 
@@ -348,7 +297,7 @@ class BinPackingSolution(
     val rotationRange: List<Rotation> = Rotation.entries,
 
     @PlanningScore(bendableHardLevelsSize = 2, bendableSoftLevelsSize = 3)
-    var score: BendableScore = BendableScore.zero(2, 3)
+    var score: BendableScore = BendableScore.zero(HARD_LEVELS, SOFT_LEVELS)
 )
 
 class BinPackingConstraintProvider : ConstraintProvider {
@@ -524,5 +473,108 @@ enum class ConstraintPurpose(
         } else {
             BendableScore.ofSoft(HARD_LEVELS, SOFT_LEVELS, level, value)
         }
+    }
+}
+
+@Configuration
+@EnableBatchProcessing
+class BatchConfig {
+    private val logger = LoggerFactory.getLogger(BatchConfig::class.java)
+
+    @Bean
+    fun binPackingItemReader(): ItemReader<BinPackingSolution> {
+        val items = listOf(
+            Item(1, width = 1, height = 3, length = 3, shape = Shape.BOX),
+            Item(2, width = 1, height = 1, length = 3, shape = Shape.BOX),
+            Item(3, width = 1, height = 1, length = 3, shape = Shape.BOX),
+            Item(4, width = 1, height = 1, length = 3, shape = Shape.BOX),
+            Item(5, width = 3, height = 1, length = 1, shape = Shape.BOX),
+            Item(6, width = 1, height = 3, length = 1, shape = Shape.BOX),
+            Item(7, width = 1, height = 1, length = 3, shape = Shape.BOX),
+            Item(8, width = 1, height = 1, length = 3, shape = Shape.BOX)
+        )
+        val bins = listOf(
+            Bin(1, width = 3, height = 3, length = 3, buffer = 0.0),
+            Bin(2, width = 3, height = 3, length = 3, buffer = 0.0)
+        )
+        val assignments = items.mapIndexed { idx, item -> ItemAssignment(id = idx, item = item) }
+        val solution = BinPackingSolution(assignments, bins)
+        return ListItemReader(listOf(solution))
+    }
+
+    @Bean
+    fun binPackingItemProcessor(): ItemProcessor<BinPackingSolution, BinPackingSolution> = ItemProcessor { solution ->
+        val solverFactory = SolverFactory.create<BinPackingSolution>(
+            SolverConfig()
+                .withSolutionClass(BinPackingSolution::class.java)
+                .withEntityClasses(ItemAssignment::class.java)
+                .withConstraintProviderClass(BinPackingConstraintProvider::class.java)
+                .withTerminationConfig(TerminationConfig().apply {
+                    unimprovedSecondsSpentLimit = 3L
+                })
+        )
+        val solver = solverFactory.buildSolver()
+        val result = solver.solve(solution)
+        latestResult = result
+        result
+    }
+
+    @Bean
+    fun binPackingItemWriter(): ItemWriter<BinPackingSolution> = ItemWriter { solutions ->
+        solutions.forEach { result ->
+            logger.info("=== Batch step completed ===")
+            logger.info("Score: ${result.score}")
+
+            val assignmentsByBin = result.assignments
+                .filter { it.bin != null }
+                .groupBy { it.bin!!.id }
+
+            assignmentsByBin.forEach { (binId, assignments) ->
+                logger.info("Bin ID: $binId")
+                val bin = result.bins.find { it.id == binId }!!
+                logger.info(buildXYProjectionLog(assignments, bin))
+            }
+        }
+    }
+
+    @Bean
+    fun binPackingStep(
+        jobRepository: JobRepository,
+        transactionManager: PlatformTransactionManager,
+        binPackingItemReader: ItemReader<BinPackingSolution>,
+        binPackingItemProcessor: ItemProcessor<BinPackingSolution, BinPackingSolution>,
+        binPackingItemWriter: ItemWriter<BinPackingSolution>
+    ): Step = StepBuilder("binPackingStep", jobRepository)
+        .chunk<BinPackingSolution, BinPackingSolution>(1, transactionManager)
+        .reader(binPackingItemReader)
+        .processor(binPackingItemProcessor)
+        .writer(binPackingItemWriter)
+        .build()
+
+
+    @Bean
+    fun binPackingJob(
+        jobRepository: JobRepository,
+        binPackingStep: Step
+    ): Job = JobBuilder("binPackingJob", jobRepository)
+        .incrementer(RunIdIncrementer())
+        .start(binPackingStep)
+        .build()
+
+
+}
+
+@Component
+@EnableScheduling
+class BatchScheduler(
+    private val jobLauncher: JobLauncher,
+    private val binPackingJob: Job
+) {
+    @Scheduled(cron = "10 * * * * *")
+    fun runBinPackingJob() {
+        val jobParameters = JobParametersBuilder()
+            .addLong("timestamp", System.currentTimeMillis())
+            .toJobParameters()
+        jobLauncher.run(binPackingJob, jobParameters)
     }
 }
