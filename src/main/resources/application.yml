@@ -9,7 +9,10 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
   data:
     jdbc:
       dialect: postgresql
+  sql:
+    init:
+      schema-locations: classpath:/db/init.sql

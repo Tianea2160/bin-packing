@@ -1,15 +1,7 @@
 package org.tianea.boxrecommend.domain.box.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
+import jakarta.persistence.*
 import org.tianea.boxrecommend.domain.common.BaseTimeEntity
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "box")
@@ -28,6 +20,6 @@ class Box(
     val height: Long,
     @Column(name = "length")
     val length: Long,
-    @Column(name = "shape")
-    val shape: String,
+    @Column(name = "max_weight")
+    val maxWeight: Long,
 ) : BaseTimeEntity()

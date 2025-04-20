@@ -28,6 +28,8 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.tianea.boxrecommend.core.constraint.BinPackingConstraintProvider
 import org.tianea.boxrecommend.core.logging.TransactionLoggingChunkListener
 import org.tianea.boxrecommend.core.vo.*
+import org.tianea.boxrecommend.domain.box.repository.BoxRepository
+import org.tianea.boxrecommend.domain.sku.repository.SkuRepository
 
 fun buildXYProjectionLog(assignments: List<ItemAssignment>, bin: Bin) = buildString {
     val maxZ = assignments.maxOfOrNull { (it.z ?: 0) + it.rotatedDimensions().third } ?: bin.length
@@ -108,21 +110,13 @@ class BatchConfig(
     )
 
     @Bean
-    fun binPackingItemReader(): ItemReader<BinPackingSolution> {
-        val items = listOf(
-            Item(1, width = 1, height = 3, length = 3, shape = Shape.BOX),
-            Item(2, width = 1, height = 1, length = 3, shape = Shape.BOX),
-            Item(3, width = 1, height = 1, length = 3, shape = Shape.BOX),
-            Item(4, width = 1, height = 1, length = 3, shape = Shape.BOX),
-            Item(5, width = 3, height = 1, length = 1, shape = Shape.BOX),
-            Item(6, width = 1, height = 3, length = 1, shape = Shape.BOX),
-            Item(7, width = 1, height = 1, length = 3, shape = Shape.BOX),
-            Item(8, width = 1, height = 1, length = 3, shape = Shape.BOX)
-        )
-        val bins = listOf(
-            Bin(1, width = 3, height = 3, length = 3, buffer = 0.0),
-            Bin(2, width = 3, height = 3, length = 3, buffer = 0.0)
-        )
+    fun binPackingItemReader(
+        skuRepository: SkuRepository,
+        boxRepository: BoxRepository,
+    ): ItemReader<BinPackingSolution> {
+        val items = skuRepository.findAll().map { Item.from(it) }
+        val bins = boxRepository.findAll().map { Bin.from(it) }
+
         val assignments = items.mapIndexed { idx, item -> ItemAssignment(id = idx, item = item) }
         val solution = BinPackingSolution(assignments, bins)
         return ListItemReader(listOf(solution))
