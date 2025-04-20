@@ -3,7 +3,7 @@ package org.tianea.boxrecommend.core
 import org.junit.jupiter.api.Test
 import org.optaplanner.test.api.score.stream.ConstraintVerifier
 import org.tianea.boxrecommend.core.vo.Bin
-import org.tianea.boxrecommend.config.BinPackingConstraintProvider
+import org.tianea.boxrecommend.core.constraint.BinPackingConstraintProvider
 import org.tianea.boxrecommend.core.vo.BinPackingSolution
 import org.tianea.boxrecommend.core.vo.Item
 import org.tianea.boxrecommend.core.vo.ItemAssignment
