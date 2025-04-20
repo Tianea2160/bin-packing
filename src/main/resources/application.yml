@@ -1,4 +1,7 @@
 spring:
+  config:
+    activate:
+      on-profile: 'default'
   datasource:
     url: jdbc:postgresql://localhost:5432/boxrecommend
     password: test1234
@@ -17,3 +20,25 @@ spring:
     init:
       schema-locations: classpath:/db/insert_data.sql
       mode: always
+---
+spring:
+  config:
+    activate:
+      on-profile: 'test'
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  application:
+    name: box-recommend
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:/db/insert_data.sql
+      schema-locations: classpath:/db/init.sql
