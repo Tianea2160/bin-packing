@@ -8,17 +8,25 @@ OptaPlanner 기반의 휴리스틱 탐색을 통해 각 아이템의 위치, 방
 - 회전 지원: 6가지 방향(Rotation) 조합
 - 버퍼 비율 고려: Bin의 내부 여유 공간 고려
 - 물리 제약 조건 지원:
-    - 무게 제한 (maxWeight)
-    - 부피 제한
-    - 겹침 방지
-    - 박스 외부 초과 방지
+  - 무게 제한 (maxWeight)
+  - 부피 제한
+  - 겹침 방지
+  - 박스 외부 초과 방지
 - 접을 수 있는 상품 처리 (collapsible = true)
-- 콘솔 기반 3D 평면 시각화 출력: XY 평면을 Z축으로 슬라이스하여 표시
+- 점수 시스템: BendableScore 기반 제약 목적별 점수 분석
+- JavaFX 기반 3D 시각화:
+  - 각 Bin 및 Item을 실시간 3D로 시각화
+  - Item별 색상 및 테두리 표시, 반투명 효과
+  - XYZ 축 기준 시점 및 라벨 출력
+  - 카메라 회전/확대가 가능한 구조로 고도화 예정
+- 콘솔 기반 3D 평면 시각화 출력도 지원 (Z-slice 기반 XY 평면)
+
 ## 사용 기술
 - Kotlin
 - OptaPlanner
-- JVM
-- 콘솔 기반 시각화 (Z-slice 기반 XY 평면)
+- JavaFX (3D 시각화)
+- JVM 기반 콘솔 시각화
+
 ## 실행 방법
 
 1. 프로젝트 빌드
@@ -27,13 +35,11 @@ OptaPlanner 기반의 휴리스틱 탐색을 통해 각 아이템의 위치, 방
 ```
 
 2. 메인 실행
-
 ```bash
 ./gradlew run
 ```
 
-
-## 예시 출력
+## 예시 출력 (콘솔)
 
 ```
 === 결과 ===
@@ -60,4 +66,3 @@ Bin 1 [XY 평면 @ Z=1]
 ./gradlew test
 ```
 OptaPlanner의 제약 조건에 대해 ConstraintVerifier 기반 유닛 테스트가 포함되어 있습니다.
-
