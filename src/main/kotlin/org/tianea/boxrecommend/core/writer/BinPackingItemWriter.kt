@@ -16,20 +16,20 @@ class BinPackingItemWriter : ListItemWriter<BinPackingSolution>() {
         logger.info("${this.javaClass.simpleName} write: chunk size=${chunk.size()}")
         logger.info("completed :  solutions ids ${chunk.map { it.id }.joinToString(",")}")
 
-//        chunk.forEach { solution ->
-//            logger.info("=== Batch step completed ===")
-//            logger.info("Score: ${solution.score}")
-//
-//            val assignmentsByBin = solution.assignments
-//                .filter { it.bin != null }
-//                .groupBy { it.bin!!.id }
-//
-//            assignmentsByBin.forEach { (binId, assignments) ->
-//                logger.info("Bin ID: $binId")
-//                val bin = solution.bins.find { it.id == binId }!!
-//                logger.info(buildXYProjectionLog(assignments, bin))
-//            }
-//        }
+        chunk.forEach { solution ->
+            logger.info("=== Batch step completed ===")
+            logger.info("Score: ${solution.score}")
+
+            val assignmentsByBin = solution.assignments
+                .filter { it.bin != null }
+                .groupBy { it.bin!!.id }
+
+            assignmentsByBin.forEach { (binId, assignments) ->
+                logger.info("Bin ID: $binId")
+                val bin = solution.bins.find { it.id == binId }!!
+                logger.info(buildXYProjectionLog(assignments, bin))
+            }
+        }
     }
 
     fun buildXYProjectionLog(assignments: List<ItemAssignment>, bin: Bin) = buildString {
