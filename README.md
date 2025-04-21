@@ -29,6 +29,9 @@ Spring Batch를 활용해 자동화된 배치 작업으로 적재 로직을 정�
   - XYZ 라벨 및 좌표축 표시
   - 카메라 조정 가능 (대각/정면/XY 평면)
 
+## 기능 순서도
+<img  src="https://github.com/user-attachments/assets/2e5c8589-b021-4ea8-9308-7a0f863bd8e9" width=500>
+
 ## 사용 기술
 
 - Kotlin
