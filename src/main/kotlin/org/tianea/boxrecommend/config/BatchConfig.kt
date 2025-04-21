@@ -5,11 +5,9 @@ import org.optaplanner.core.api.solver.SolverFactory
 import org.optaplanner.core.config.solver.SolverConfig
 import org.optaplanner.core.config.solver.termination.TerminationConfig
 import org.springframework.batch.core.Job
-import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.job.builder.JobBuilder
-import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.core.repository.JobRepository
 import org.springframework.batch.core.step.builder.StepBuilder
@@ -19,9 +17,6 @@ import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.SimpleAsyncTaskExecutor
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.tianea.boxrecommend.core.constraint.BinPackingConstraintProvider
 import org.tianea.boxrecommend.core.logging.LoggingChunkListener
@@ -58,9 +53,13 @@ class BatchConfig(
         .processor(binPackingItemProcessor)
         .writer(binPackingItemWriter)
         .listener(loggingChunkListener)
+        .taskExecutor(
+            SimpleAsyncTaskExecutor()
+                .apply {
+                    concurrencyLimit = 4
+                }
+        )
         .faultTolerant()
-        .retry(Exception::class.java)
-        .retryLimit(3)
         .build()
 
     @Bean

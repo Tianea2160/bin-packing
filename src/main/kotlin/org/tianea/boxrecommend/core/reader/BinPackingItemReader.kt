@@ -1,8 +1,9 @@
 package org.tianea.boxrecommend.core.reader
 
 import org.springframework.batch.core.configuration.annotation.StepScope
-import org.springframework.batch.item.ItemReader
+import org.springframework.batch.item.ItemStreamReader
 import org.springframework.batch.item.support.ListItemReader
+import org.springframework.batch.item.support.SynchronizedItemStreamReader
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.tianea.boxrecommend.core.vo.Bin
@@ -21,14 +22,23 @@ class BinPackingReaderConfig(
 
     @Bean
     @StepScope
-    fun binPackingItemReader(): ItemReader<BinPackingSolution> {
+    fun binPackingItemReader(): ItemStreamReader<BinPackingSolution> {
         val items = skuRepository.findAll().map { Item.from(it) }
         val bins = boxRepository.findAll().map { Bin.from(it) }
         val assignments = items.mapIndexed { idx, item -> ItemAssignment(id = idx, item = item) }
 
-        val duplicated = (0 until 10)
+        val duplicated = (0 until 20)
             .map { idx -> BinPackingSolution(idx.toLong(), assignments, bins) }
             .toCollection(LinkedList())
-        return ListItemReader(duplicated)
+        val customReader = CustomBinPackingItemReader(ListItemReader(duplicated))
+        return SynchronizedItemStreamReader<BinPackingSolution>()
+            .apply { setDelegate(customReader) }
     }
+}
+
+class CustomBinPackingItemReader<T>(
+    private val reader: ListItemReader<T>
+) : ItemStreamReader<T> {
+
+    override fun read(): T? = reader.read()
 }
