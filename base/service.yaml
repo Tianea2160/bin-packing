@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: box-recommend
+  namespace: box-recommend
   labels:
     app: box-recommend
 spec:
