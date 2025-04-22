@@ -13,6 +13,10 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     jdbc:
       dialect: postgresql
@@ -52,7 +56,7 @@ spring:
     activate:
       on-profile: 'prod'
   datasource:
-    url: jdbc:postgresql://postgres:5432/boxrecommend  # 쿠버네티스 서비스 이름으로 연결
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:boxrecommend}  # 환경 변수 또는 기본값으로 설정
     password: ${DB_PASSWORD:test1234}  # 환경 변수 또는 기본값
     username: ${DB_USERNAME:test1234}
     driver-class-name: org.postgresql.Driver
@@ -62,6 +66,10 @@ spring:
     show-sql: false  # 운영 환경에서는 SQL 로깅 비활성화
     hibernate:
       ddl-auto: none  # 운영 환경에서는 스키마 자동 생성 비활성화
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     jdbc:
       dialect: postgresql
