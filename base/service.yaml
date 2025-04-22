@@ -9,8 +9,24 @@ spec:
   ports:
   - port: 80
     targetPort: 8080
-    nodePort: 30080
     protocol: TCP
     name: http
   selector:
     app: box-recommend
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: box-recommend-nodeport
+  labels:
+    app: box-recommend
+spec:
+  type: NodePort
+  selector:
+    app: box-recommend
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080
+      protocol: TCP
