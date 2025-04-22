@@ -11,7 +11,7 @@ spec:
     path: overlays/prod
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: box-recommend
+    namespace: box-recommend  # 명시적으로 box-recommend 네임스페이스 사용
   syncPolicy:
     automated:
       selfHeal: true

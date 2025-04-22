@@ -6,4 +6,5 @@ resources:
   - box-recommend-app.yaml
   - configmap.yaml
   - postgres.yaml
+  - postgres-pvc.yaml
   - secret.yaml
