@@ -13,9 +13,7 @@ spec:
     server: 'https://kubernetes.default.svc'
     namespace: box-recommend  # 명시적으로 box-recommend 네임스페이스 사용
   syncPolicy:
-    automated:
-      selfHeal: true
-      prune: true
+    # automated 섹션 제거하여 수동 배포로 전환
     syncOptions:
       - CreateNamespace=true
   ignoreDifferences:
