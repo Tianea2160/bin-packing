@@ -14,7 +14,3 @@ spec:
       targetPort: 8080
       nodePort: 30080
       protocol: TCP
-    - name: postgres
-      port: 5432
-      targetPort: 5432
-      protocol: TCP
