@@ -42,11 +42,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: box-recommend-postgres
+  name: postgres
   labels:
-    app: box-recommend-postgres
+    app: postgres
 spec:
-  type: NodePort
   ports:
     - port: 5432
       targetPort: 5432
