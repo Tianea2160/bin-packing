@@ -20,6 +20,8 @@ spring:
     init:
       schema-locations: classpath:/db/insert_data.sql
       mode: always
+server:
+  port: 0  # 개발 환경에서는 랜덤 포트 사용
 ---
 spring:
   config:
@@ -42,3 +44,29 @@ spring:
       mode: always
       data-locations: classpath:/db/insert_data.sql
       schema-locations: classpath:/db/init.sql
+server:
+  port: 0  # 테스트 환경에서도 랜덤 포트 사용
+---
+spring:
+  config:
+    activate:
+      on-profile: 'prod'
+  datasource:
+    url: jdbc:postgresql://postgres:5432/boxrecommend  # 쿠버네티스 서비스 이름으로 연결
+    password: ${DB_PASSWORD:test1234}  # 환경 변수 또는 기본값
+    username: ${DB_USERNAME:test1234}
+    driver-class-name: org.postgresql.Driver
+  application:
+    name: box-recommend
+  jpa:
+    show-sql: false  # 운영 환경에서는 SQL 로깅 비활성화
+    hibernate:
+      ddl-auto: none  # 운영 환경에서는 스키마 자동 생성 비활성화
+  data:
+    jdbc:
+      dialect: postgresql
+  sql:
+    init:
+      mode: never  # 운영 환경에서는 초기 데이터 로드 비활성화
+server:
+  port: 8080  # 운영 환경에서는 고정 포트 사용

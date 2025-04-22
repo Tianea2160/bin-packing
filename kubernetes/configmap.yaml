@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: box-recommend-config
+  labels:
+    app: box-recommend
+data:
+  application-prod.yml: |-
+    spring:
+      datasource:
+        url: jdbc:postgresql://postgres:5432/boxrecommend
+        password: ${DB_PASSWORD:test1234}
+        username: ${DB_USERNAME:test1234}
+        driver-class-name: org.postgresql.Driver
+      jpa:
+        show-sql: false
+        hibernate:
+          ddl-auto: none
+      data:
+        jdbc:
+          dialect: postgresql
+      sql:
+        init:
+          mode: never
+    server:
+      port: 8080
+    
+    # 성능 최적화 설정
+    optaplanner:
+      solver:
+        termination:
+          spent-limit: 30s
+          unimproved-spent-limit: 5s
+    
+    # 로깅 설정
+    logging:
+      level:
+        root: INFO
+        org.tianea.boxrecommend: INFO
