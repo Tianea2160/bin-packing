@@ -9,12 +9,12 @@ spec:
   selector:
     app: box-recommend
   ports:
-    - port: 80
-      name: http
+    - name: http
+      port: 80
       targetPort: 8080
       nodePort: 30080
       protocol: TCP
-    - port: 5432
-      name: postgres
+    - name: postgres
+      port: 5432
       targetPort: 5432
       protocol: TCP
