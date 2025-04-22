@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: box-recommend
-  namespace: box-recommend
+  namespace: argocd
 spec:
   project: default
   source:
@@ -11,7 +11,7 @@ spec:
     path: overlays/prod
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: box-recommend
+    namespace: default
   syncPolicy:
     automated:
       selfHeal: true
