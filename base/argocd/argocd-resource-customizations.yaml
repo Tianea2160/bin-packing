@@ -7,6 +7,13 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
 data:
+  # Application 헬스 체크 상태
+  "applications.argoproj.io_Application.health.lua": |
+    hs = {}
+    hs.status = "Healthy"
+    hs.message = "Application is healthy"
+    return hs
+
   # 스테이트풀셋 헬스 체크 상태
   "statefulsets.health.lua": |
     hs = {}
@@ -100,4 +107,58 @@ data:
     
     hs.status = "Progressing"
     hs.message = "Waiting for job to start"
+    return hs
+    
+  # Deployment 헬스 체크 상태
+  "deployments.health.lua": |
+    hs = {}
+    if obj.spec.paused then
+      hs.status = "Suspended"
+      hs.message = "Deployment is paused"
+      return hs
+    end
+    if obj.status == nil or obj.status.updatedReplicas == nil then
+      hs.status = "Progressing"
+      hs.message = "Waiting for rollout to finish"
+      return hs
+    end
+    if obj.spec.replicas ~= nil and obj.status.updatedReplicas < obj.spec.replicas then
+      hs.status = "Progressing"
+      hs.message = string.format("Updating... %d/%d replicas updated", obj.status.updatedReplicas, obj.spec.replicas)
+      return hs
+    end
+    if obj.status.replicas ~= nil and obj.status.updatedReplicas < obj.status.replicas then
+      hs.status = "Progressing"
+      hs.message = string.format("Updating... %d/%d replicas updated", obj.status.updatedReplicas, obj.status.replicas)
+      return hs
+    end
+    if obj.status.availableReplicas ~= nil and obj.status.availableReplicas < obj.status.updatedReplicas then
+      hs.status = "Progressing"
+      hs.message = string.format("Updating... %d/%d replicas available", obj.status.availableReplicas, obj.status.updatedReplicas)
+      return hs
+    end
+    if obj.status.observedGeneration ~= nil and obj.metadata.generation ~= nil and obj.status.observedGeneration < obj.metadata.generation then
+      hs.status = "Progressing"
+      hs.message = "Updating..."
+      return hs
+    end
+    hs.status = "Healthy"
+    hs.message = "Deployment is healthy"
+    return hs
+
+  # ReplicaSet 헬스 체크 상태
+  "replicasets.health.lua": |
+    hs = {}
+    if obj.status ~= nil and obj.status.readyReplicas ~= nil and obj.spec.replicas ~= nil then
+      if obj.status.readyReplicas == obj.spec.replicas then
+        hs.status = "Healthy"
+        hs.message = string.format("%d/%d replicas are ready", obj.status.readyReplicas, obj.spec.replicas)
+      else
+        hs.status = "Progressing"
+        hs.message = string.format("%d/%d replicas are ready", obj.status.readyReplicas, obj.spec.replicas)
+      end
+    else
+      hs.status = "Progressing"
+      hs.message = "Waiting for ReplicaSet to become ready"
+    end
     return hs

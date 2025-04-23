@@ -8,93 +8,42 @@ metadata:
     app.kubernetes.io/part-of: argocd
 data:
   # 실제 사용할 ArgoCD 인스턴스의 URL로 변경해야 합니다
-  # 일반적으로 실제 도메인 또는 IP 주소와 포트를 사용합니다
-  url: https://argocd.${DOMAIN_NAME}
+  url: https://localhost:30443
   admin.enabled: "true"
   # TLS 관련 설정 추가
-  tls.insecure: "false"
+  tls.insecure: "true"
   # CORS 설정 추가
   application.instanceLabelKey: argocd.argoproj.io/instance
-  # CORS 허용 origins - 클라이언트 애플리케이션의 도메인 추가
-  # 예: http://localhost:3000, http://localhost:8080, https://your-app-domain.com
   ui.bannercontent: ""
+  timeout.reconciliation: 180s
   
-  # 헬스 체크 커스터마이징 설정 추가
-  resource.customizations.health.apps_Deployment: |
-    hs = {}
-    hs.status = "Progressing"
-    hs.message = ""
-    if obj.status ~= nil then
-      if obj.status.replicas == 0 then
-        hs.status = "Suspended"
-        return hs
-      end
-      if obj.status.updatedReplicas ~= nil and obj.status.replicas ~= nil then
-        if obj.status.updatedReplicas == obj.status.replicas and obj.status.availableReplicas ~= nil and obj.status.availableReplicas == obj.status.replicas then
-          hs.status = "Healthy"
-          return hs
-        end
-      end
-      if obj.status.unavailableReplicas ~= nil and obj.status.unavailableReplicas > 0 then
-        hs.status = "Degraded"
-        hs.message = string.format("%d/%d pods are unavailable", obj.status.unavailableReplicas, obj.status.replicas)
-        return hs
-      end
-    end
-    return hs
-
-  resource.customizations.health.batch_Job: |
-    hs = {}
-    hs.status = "Progressing"
-    hs.message = ""
-    if obj.status ~= nil then
-      if obj.status.succeeded ~= nil and obj.status.succeeded > 0 then
+  # 애플리케이션 컨트롤러 설정
+  controller.status.cache.normalization.enabled: "true"
+  
+  # 리소스 헬스 체크 커스텀 설정
+  resource.customizations: |
+    argoproj.io/Application:
+      health.lua: |
+        hs = {}
         hs.status = "Healthy"
-        hs.message = "Job completed successfully"
+        hs.message = "Application is healthy"
         return hs
-      end
-      if obj.status.failed ~= nil and obj.status.failed > 0 then
-        hs.status = "Degraded"
-        hs.message = string.format("Job has failed %d times", obj.status.failed)
-        return hs
-      end
-    end
-    return hs
-
-  resource.customizations.health.apps_StatefulSet: |
-    hs = {}
-    hs.status = "Progressing"
-    hs.message = ""
-    if obj.status ~= nil then
-      if obj.status.readyReplicas ~= nil and obj.status.currentReplicas ~= nil then
-        if obj.status.readyReplicas == obj.status.currentReplicas and obj.status.readyReplicas == obj.spec.replicas then
-          hs.status = "Healthy"
-          return hs
+    apps/Deployment:
+      health.lua: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.availableReplicas ~= nil and obj.status.availableReplicas > 0 then
+            hs.status = "Healthy"
+            hs.message = "Deployment is available"
+            return hs
+          end
         end
-      end
-    end
-    return hs
-
-  resource.customizations.health.v1_Service: |
-    hs = {}
-    hs.status = "Healthy"
-    return hs
-
-  resource.customizations.health.v1_PersistentVolumeClaim: |
-    hs = {}
-    if obj.status ~= nil and obj.status.phase ~= nil then
-      if obj.status.phase == "Bound" then
+        hs.status = "Progressing"
+        hs.message = "Waiting for deployment"
+        return hs
+    v1/Service:
+      health.lua: |
+        hs = {}
         hs.status = "Healthy"
-        hs.message = "PVC is bound"
-      elseif obj.status.phase == "Pending" then
-        hs.status = "Progressing" 
-        hs.message = "PVC is pending"
-      else
-        hs.status = "Degraded"
-        hs.message = string.format("PVC is in phase: %s", obj.status.phase)
-      end
-    else
-      hs.status = "Unknown"
-      hs.message = "Unable to determine PVC status"
-    end
-    return hs
+        hs.message = "Service is healthy"
+        return hs

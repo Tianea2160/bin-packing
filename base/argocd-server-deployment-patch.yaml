@@ -13,12 +13,20 @@ spec:
         - --staticassets
         - /shared/app
         - --insecure  # 개발 환경에서만 사용, 프로덕션에서는 제거
-        - --cors
         - --disable-auth  # 개발 환경에서만 사용, 프로덕션에서는 제거해야 함
+        - --loglevel
+        - debug
+        - --cors
         env:
+        - name: ARGOCD_SERVER_INSECURE
+          value: "true"
+        - name: ARGOCD_SERVER_BASEHREF
+          value: "/"
+        - name: ARGOCD_SERVER_ROOTPATH
+          value: "/"
+        - name: ARGOCD_SERVER_LOG_FORMAT
+          value: "text"
+        - name: ARGOCD_SERVER_LOG_LEVEL
+          value: "debug"
         - name: ARGOCD_SERVER_CORS_ALLOW_ORIGIN
-          valueFrom:
-            configMapKeyRef:
-              name: argocd-cmd-params-cm
-              key: server.cors.allow-origin
-              optional: true
+          value: "*"
