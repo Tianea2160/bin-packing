@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: argocd-config
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/refresh: hard
 spec:
   project: default
   source:
@@ -21,6 +23,5 @@ spec:
   info:
     - name: Description
       value: ArgoCD self-managed configuration
-  sources: [ ]
-  # 헬스 체크 설정 추가
+  sources: []
   revisionHistoryLimit: 3

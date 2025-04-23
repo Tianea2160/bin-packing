@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: box-recommend-app
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/refresh: hard
 spec:
   project: default
   source:
@@ -27,8 +29,5 @@ spec:
     - name: Description
       value: This application deploys the box recommendation service only (without database).
   sources: []
-  # 헬스 체크 설정 추가
+  # 헬스 필드 제거 (ArgoCD API에서 지원하지 않음)
   revisionHistoryLimit: 3
-  # 헬스 상태 커스텀 설정
-  health:
-    healthCheckResourcePath: 'external://google.com'  # 기본 체크에 추가

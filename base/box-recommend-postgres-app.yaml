@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: box-recommend-postgres
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/refresh: hard
 spec:
   project: default
   source:
@@ -27,5 +29,4 @@ spec:
     - name: Description
       value: PostgreSQL database for the box recommendation service.
   sources: []
-  # 헬스 체크 설정 추가
   revisionHistoryLimit: 3

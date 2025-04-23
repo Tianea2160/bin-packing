@@ -1,7 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+# 상대 경로 대신 해당 파일들을 직접 app 디렉토리에 복사해야 합니다
+# 아래는 임시 솔루션으로, 실제로는 파일들을 app 디렉토리로 복사해야 합니다
 resources:
-  - ../box-recommend-deployment.yaml
-  - ../box-recommend-service.yaml
-  - ../box-recommend-configmap.yaml
-  - ../box-recommend-secret.yaml
+  - box-recommend-deployment.yaml
+  - box-recommend-service.yaml
+  - box-recommend-configmap.yaml
+  - box-recommend-secret.yaml
