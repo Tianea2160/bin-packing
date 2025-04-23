@@ -15,7 +15,12 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
   info:
     - name: Description
       value: ArgoCD self-managed configuration
-  sources: []
+  sources: [ ]
+  # 헬스 체크 설정 추가
+  revisionHistoryLimit: 3

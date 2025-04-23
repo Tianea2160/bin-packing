@@ -43,6 +43,33 @@ spec:
               key: password
         - name: JAVA_OPTS
           value: "-Xmx768m -Xms256m"
+        # 준비성 프로브 추가
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        # 활성 프로브 추가
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
+        # 스타트업 프로브 추가
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
         volumeMounts:
         - name: config-volume
           mountPath: /app/config

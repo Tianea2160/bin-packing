@@ -7,8 +7,70 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
 data:
+  # 실제 사용할 ArgoCD 인스턴스의 URL로 변경해야 합니다
+  # 일반적으로 실제 도메인 또는 IP 주소와 포트를 사용합니다
   url: https://argocd.${DOMAIN_NAME}
   admin.enabled: "true"
+  # TLS 관련 설정 추가
   tls.insecure: "false"
+  # CORS 설정 추가
   application.instanceLabelKey: argocd.argoproj.io/instance
+  # CORS 허용 origins - 클라이언트 애플리케이션의 도메인 추가
+  # 예: http://localhost:3000, http://localhost:8080, https://your-app-domain.com
   ui.bannercontent: ""
+  
+  # 헬스 체크 커스터마이징 설정 추가
+  resource.customizations.health.apps_Deployment: |
+    hs = {}
+    hs.status = "Progressing"
+    hs.message = ""
+    if obj.status ~= nil then
+      if obj.status.updatedReplicas ~= nil and obj.status.replicas ~= nil then
+        if obj.status.updatedReplicas == obj.status.replicas and obj.status.availableReplicas == obj.status.replicas then
+          hs.status = "Healthy"
+        end
+      end
+      if obj.status.conditions ~= nil then
+        for i, condition in ipairs(obj.status.conditions) do
+          if condition.type == "Available" and condition.status == "False" then
+            hs.status = "Degraded"
+            hs.message = condition.message
+          end
+        end
+      end
+    end
+    return hs
+
+  resource.customizations.health.batch_Job: |
+    hs = {}
+    hs.status = "Progressing"
+    hs.message = ""
+    if obj.status ~= nil then
+      if obj.status.succeeded ~= nil and obj.status.succeeded > 0 then
+        hs.status = "Healthy"
+        hs.message = "Job completed successfully"
+      end
+      if obj.status.failed ~= nil and obj.status.failed > 0 then
+        hs.status = "Degraded"
+        hs.message = "Job has failed"
+      end
+    end
+    return hs
+
+  resource.customizations.health.apps_StatefulSet: |
+    hs = {}
+    hs.status = "Progressing"
+    hs.message = ""
+    if obj.status ~= nil then
+      if obj.status.readyReplicas ~= nil and obj.status.readyReplicas == obj.spec.replicas then
+        hs.status = "Healthy"
+      elseif obj.status.readyReplicas ~= nil then
+        hs.message = string.format("%d/%d pods are ready", obj.status.readyReplicas, obj.spec.replicas)
+      end
+    end
+    return hs
+
+  resource.customizations.health.networking.k8s.io_Ingress: |
+    hs = {}
+    hs.status = "Healthy"
+    return hs

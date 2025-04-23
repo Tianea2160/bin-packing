@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-resource-customizations
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # 스테이트풀셋 헬스 체크 상태
+  "statefulsets.health.lua": |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.readyReplicas == obj.spec.replicas then
+        hs.status = "Healthy"
+        hs.message = "StatefulSet is healthy"
+        return hs
+      end
+      if obj.status.readyReplicas ~= nil then
+        if obj.status.readyReplicas < obj.spec.replicas then
+          hs.status = "Progressing"
+          hs.message = string.format("%d/%d requested pods are running", obj.status.readyReplicas, obj.spec.replicas)
+          return hs
+        end
+      end
+    end
+    hs.status = "Progressing"
+    hs.message = "Waiting for StatefulSet to be ready"
+    return hs
+
+  # PV 헬스 체크 상태
+  "persistentvolumeclaims.health.lua": |
+    hs = {}
+    if obj.status ~= nil and obj.status.phase ~= nil then
+      if obj.status.phase == "Bound" then
+        hs.status = "Healthy"
+        hs.message = "PVC is bound"
+        return hs
+      elseif obj.status.phase == "Pending" then
+        hs.status = "Progressing" 
+        hs.message = "PVC is pending"
+        return hs
+      else
+        hs.status = "Degraded"
+        hs.message = string.format("PVC is in phase: %s", obj.status.phase)
+        return hs
+      end
+    end
+    hs.status = "Unknown"
+    hs.message = "Unable to determine PVC status"
+    return hs
+
+  # 서비스 헬스 체크 상태
+  "services.health.lua": |
+    hs = {}
+    if obj.spec.type == "ExternalName" then
+      hs.status = "Healthy"
+      hs.message = "Service is ExternalName type"
+      return hs
+    end
+    
+    if obj.spec.clusterIP ~= nil and obj.spec.clusterIP ~= "" then
+      hs.status = "Healthy"
+      hs.message = "Service has ClusterIP assigned"
+      return hs
+    end
+    
+    hs.status = "Progressing"
+    hs.message = "Waiting for ClusterIP to be assigned"
+    return hs
+
+  # 잡 헬스 체크 상태
+  "jobs.health.lua": |
+    hs = {}
+    if obj.status ~= nil then
+      if obj.status.succeeded ~= nil and obj.status.succeeded > 0 then
+        hs.status = "Healthy"
+        hs.message = "Job completed successfully"
+        return hs
+      end
+      
+      if obj.status.failed ~= nil and obj.status.failed > 0 then
+        if obj.spec.backoffLimit ~= nil and obj.status.failed >= obj.spec.backoffLimit then
+          hs.status = "Degraded"
+          hs.message = "Job has failed"
+          return hs
+        else
+          hs.status = "Progressing"
+          hs.message = "Job is retrying after failure"
+          return hs
+        end
+      end
+      
+      if obj.status.active ~= nil and obj.status.active > 0 then
+        hs.status = "Progressing"
+        hs.message = "Job is running"
+        return hs
+      end
+    end
+    
+    hs.status = "Progressing"
+    hs.message = "Waiting for job to start"
+    return hs
