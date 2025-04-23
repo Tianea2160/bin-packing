@@ -37,3 +37,15 @@ spec:
     kind: Deployment
     jsonPointers:
     - /spec/replicas
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/template/spec/containers/0/resources
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/template/spec/containers/0/readinessProbe
+  - group: apps 
+    kind: Deployment
+    jsonPointers:
+    - /spec/template/spec/containers/0/livenessProbe

@@ -30,6 +30,18 @@ spec:
       kind: Deployment
       jsonPointers:
         - /spec/template/spec/containers/0/image
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/containers/0/resources
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/containers/0/readinessProbe
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/template/spec/containers/0/livenessProbe
   info:
     - name: Description
       value: This application deploys the box recommendation service only (without database).

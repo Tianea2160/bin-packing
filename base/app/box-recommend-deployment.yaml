@@ -43,32 +43,33 @@ spec:
               key: password
         - name: JAVA_OPTS
           value: "-Xmx768m -Xms256m"
-        # actuator 대신 기본 경로로 준비성 프로브 수정
+        # 간단한 TCP소켓 체크로 변경 (최소 헬스체크)
         readinessProbe:
-          httpGet:
-            path: /
+          tcpSocket:
             port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
           failureThreshold: 3
-        # 활성 프로브도 기본 경로로 수정
+          successThreshold: 1
+        # 활성 프로브도 TCP소켓으로 단순화
         livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 15
-          timeoutSeconds: 10
-          failureThreshold: 3
-        # TCP 소켓 프로브로 스타트업 체크
-        startupProbe:
           tcpSocket:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 30
+          failureThreshold: 3
+          successThreshold: 1
+        # TCP 소켓 프로브로 스타트업 체크
+        startupProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 20
+          successThreshold: 1
         volumeMounts:
         - name: config-volume
           mountPath: /app/config

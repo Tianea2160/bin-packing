@@ -7,17 +7,15 @@ metadata:
     app.kubernetes.io/name: argocd-cmd-params-cm
     app.kubernetes.io/part-of: argocd
 data:
-  # CORS 설정 추가
+  # CORS 설정 
   server.enable.cors: "true"
   server.cors.max-age: "86400"
   server.cors.allow-methods: "POST, GET, OPTIONS, PUT, DELETE, PATCH"
-  server.cors.allow-credentials: "true"
-  # 여기에 CORS 허용 도메인을 추가
-  # 예: http://localhost:3000,http://localhost:8080,https://your-app-domain.com
+  server.cors.allow-credentials: "false"
   server.cors.allow-origin: "*"
-  server.cors.allow-headers: "content-type, authorization, x-grpc-web, x-id-token"
+  server.cors.allow-headers: "content-type, authorization, x-grpc-web, x-id-token, origin, accept"
   # 기타 중요 서버 매개변수
-  server.insecure: "false"
+  server.insecure: "true"
   server.enable.gzip: "true"
   server.log.format: "json"
   server.log.level: "info"

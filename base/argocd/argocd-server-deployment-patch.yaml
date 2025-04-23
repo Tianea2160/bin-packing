@@ -16,7 +16,7 @@ spec:
         - --disable-auth  # 개발 환경에서만 사용, 프로덕션에서는 제거해야 함
         - --loglevel
         - debug
-        - --cors
+        # CORS는 ConfigMap에서 관리합니다
         env:
         - name: ARGOCD_SERVER_INSECURE
           value: "true"
@@ -28,5 +28,3 @@ spec:
           value: "text"
         - name: ARGOCD_SERVER_LOG_LEVEL
           value: "debug"
-        - name: ARGOCD_SERVER_CORS_ALLOW_ORIGIN
-          value: "*"
