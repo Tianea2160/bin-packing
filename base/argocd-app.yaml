@@ -1,26 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: box-recommend-app
+  name: argocd-config
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/Tianea2160/bin-packing'
     targetRevision: master
-    path: base/app
+    path: base/argocd
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: box-recommend
+    namespace: argocd
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-  ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      jsonPointers:
-        - /spec/template/spec/containers/0/image
   info:
     - name: Description
-      value: This application deploys the box recommendation service only (without database).
+      value: ArgoCD self-managed configuration
   sources: []

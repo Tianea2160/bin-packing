@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: box-recommend-app
+  name: box-recommend-postgres
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/Tianea2160/bin-packing'
     targetRevision: master
-    path: base/app
+    path: base/postgres
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: box-recommend
@@ -19,8 +19,8 @@ spec:
     - group: apps
       kind: Deployment
       jsonPointers:
-        - /spec/template/spec/containers/0/image
+        - /spec/replicas
   info:
     - name: Description
-      value: This application deploys the box recommendation service only (without database).
+      value: PostgreSQL database for the box recommendation service.
   sources: []
