@@ -9,6 +9,7 @@ resources:
   - argocd-cmd-params-cm.yaml
   - argocd-resource-customizations.yaml
   - argocd-project.yaml
+  - argocd-rbac-cm.yaml
 
 # 최신 kustomize 버전에서 권장하는 patches 구문 사용
 patches:
