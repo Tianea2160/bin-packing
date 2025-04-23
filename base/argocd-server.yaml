@@ -9,6 +9,15 @@ spec:
     repoURL: https://github.com/argoproj/argo-cd.git
     targetRevision: stable
     path: manifests
+    # 헬름 차트 사용시 예시
+    # chart: argo-cd
+    # repoURL: https://argoproj.github.io/argo-helm
+    # targetRevision: 5.13.7 # 안정적인 특정 버전을 사용하는 것이 좋습니다
+    # helm:
+    #   values: |
+    #     server:
+    #       extraArgs:
+    #         - --insecure=false
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -18,3 +27,13 @@ spec:
       prune: true
     syncOptions:
       - CreateNamespace=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - Validate=true
+  # 상태 확인 설정 추가
+  revisionHistoryLimit: 3
+  ignoreDifferences:
+  - group: apps
+    kind: Deployment
+    jsonPointers:
+    - /spec/replicas

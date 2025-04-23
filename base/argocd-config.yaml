@@ -7,5 +7,15 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
 data:
-  url: https://argocd.example.com
+  # 실제 사용할 ArgoCD 인스턴스의 URL로 변경해야 합니다
+  # 일반적으로 실제 도메인 또는 IP 주소와 포트를 사용합니다
+  url: https://argocd.${DOMAIN_NAME}
   admin.enabled: "true"
+  # TLS 관련 설정 추가
+  tls.insecure: "false"
+  # OIDC 또는 다른 인증 방법은 필요에 따라 추가할 수 있습니다
+  # oidc.config: |
+  #   name: OIDC
+  #   issuer: https://your-oidc-provider.com
+  #   clientID: your-client-id
+  #   clientSecret: $oidc.your-client-secret

@@ -14,7 +14,8 @@ spec:
   - name: https
     port: 443
     protocol: TCP
-    targetPort: 8080
+    # HTTPS는 8443 포트로 리다이렉션 (ArgoCD 서버의 HTTPS 포트)
+    targetPort: 8443
     nodePort: 30443
   selector:
     app.kubernetes.io/name: argocd-server
