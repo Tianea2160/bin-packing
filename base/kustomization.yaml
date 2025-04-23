@@ -4,6 +4,6 @@ resources:
   # 네임스페이스 먼저 생성
   - namespace.yaml
   # ArgoCD 애플리케이션 설정
-  - argocd-app.yaml
-  - box-recommend-app.yaml
-  - box-recommend-postgres-app.yaml
+  - argocd/argocd-app.yaml
+  - app/box-recommend-app.yaml
+  - postgres/box-recommend-postgres-app.yaml
