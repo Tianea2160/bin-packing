@@ -52,16 +52,7 @@ spec:
         # 시작 타임아웃 증가
         - name: SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE
           value: "30s"
-        # 스타트업 프로브만 유지하고 나머지는 비활성화
-        # 스타트업 프로브 타이밍 대폭 조정
-        startupProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 60 # 최대 10분(60*10초) 기다림
-          successThreshold: 1
+        # 모든 프로브 제거 - 가장 간단한 구성
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
