@@ -3,8 +3,6 @@
 cd ..
 # Minikube Docker 환경 사용
 # shellcheck disable=SC2046
-eval $(minikube docker-env)
-
 # 이미지 빌드
 docker build -t rhlehfndvkd7557/box-recommend:latest-java21 .
 docker push rhlehfndvkd7557/box-recommend:latest-java21
