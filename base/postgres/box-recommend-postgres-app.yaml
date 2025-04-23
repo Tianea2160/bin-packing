@@ -22,9 +22,6 @@ spec:
       - Validate=false
       - ApplyOutOfSyncOnly=true
       - SkipDryRunOnMissingResource=true
-    automated:
-      selfHeal: true
-      prune: true
   ignoreDifferences:
     - group: apps
       kind: Deployment
