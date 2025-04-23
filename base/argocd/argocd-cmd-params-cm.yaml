@@ -7,20 +7,14 @@ metadata:
     app.kubernetes.io/name: argocd-cmd-params-cm
     app.kubernetes.io/part-of: argocd
 data:
-  # CORS 설정 
+  # CORS 설정 간소화
   server.enable.cors: "true"
-  server.cors.max-age: "86400"
-  server.cors.allow-methods: "POST, GET, OPTIONS, PUT, DELETE, PATCH"
+  server.cors.allow-methods: "*"
   server.cors.allow-credentials: "false"
   server.cors.allow-origin: "*"
-  server.cors.allow-headers: "content-type, authorization, x-grpc-web, x-id-token, origin, accept"
+  server.cors.allow-headers: "*"
   # 기타 중요 서버 매개변수
   server.insecure: "true"
   server.enable.gzip: "true"
-  server.log.format: "json"
-  server.log.level: "info"
-  repo.server: "argocd-repo-server:8081"
-  dex.server: "http://argocd-dex-server:5556"
-  controller.status.processors: "20"
-  controller.operation.processors: "10"
-  controller.app.sync.wave: "5"
+  server.log.format: "text"
+  server.log.level: "debug"

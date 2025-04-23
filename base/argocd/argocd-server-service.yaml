@@ -3,9 +3,6 @@ kind: Service
 metadata:
   name: argocd-server-nodeport
   namespace: argocd
-  annotations:
-    # 헬스체크 경로를 명시적으로 지정
-    service.alpha.kubernetes.io/app-protocols: '{"http":"HTTP","https":"HTTPS"}'
 spec:
   type: NodePort
   ports:
@@ -14,10 +11,5 @@ spec:
     protocol: TCP
     targetPort: 8080
     nodePort: 30081
-  - name: https
-    port: 443
-    protocol: TCP
-    targetPort: 8080  # insecure 모드에서는 HTTP 포트 사용
-    nodePort: 30443
   selector:
     app.kubernetes.io/name: argocd-server

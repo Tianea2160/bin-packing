@@ -12,18 +12,19 @@ spec:
         - /usr/local/bin/argocd-server
         - --staticassets
         - /shared/app
-        - --insecure  # 개발 환경에서만 사용, 프로덕션에서는 제거
-        - --disable-auth  # 개발 환경에서만 사용, 프로덕션에서는 제거해야 함
+        - --insecure
+        - --disable-auth
         - --loglevel
         - debug
-        # CORS는 ConfigMap에서 관리합니다
+        - --rootpath
+        - /
+        - --basehref
+        - /
+        - --bindaddr
+        - 0.0.0.0:8080
         env:
         - name: ARGOCD_SERVER_INSECURE
           value: "true"
-        - name: ARGOCD_SERVER_BASEHREF
-          value: "/"
-        - name: ARGOCD_SERVER_ROOTPATH
-          value: "/"
         - name: ARGOCD_SERVER_LOG_FORMAT
           value: "text"
         - name: ARGOCD_SERVER_LOG_LEVEL
