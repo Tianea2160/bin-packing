@@ -24,7 +24,7 @@ spec:
       - SkipDryRunOnMissingResource=true
     automated:
       selfHeal: true
-      prune: false
+      prune: true
   ignoreDifferences:
     - group: apps
       kind: Deployment
