@@ -12,3 +12,5 @@ resources:
   - argocd-server.yaml
   - argocd-installation.yaml
   - argocd-server-service.yaml
+  - argocd-admin-password.yaml
+  - argocd-config.yaml
