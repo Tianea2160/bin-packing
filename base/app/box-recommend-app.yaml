@@ -25,9 +25,6 @@ spec:
     automated:
       selfHeal: true
       prune: false
-  # 데이터베이스 애플리케이션에 의존성 추가
-  dependsOn:
-    - name: box-recommend-postgres
   ignoreDifferences:
     - group: apps
       kind: Deployment
