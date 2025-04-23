@@ -6,8 +6,8 @@ cd ..
 eval $(minikube docker-env)
 
 # 이미지 빌드
-docker build -t localhost:49410/box-recommend:latest .
-docker push localhost:49410/box-recommend:latest
+docker build -t box-recommend:latest .
+docker push box-recommend:latest
 
 # Deployment 재시작하여 새 이미지 사용
 kubectl rollout restart deployment box-recommend --namespace box-recommend

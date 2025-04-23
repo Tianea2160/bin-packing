@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: box-recommend
-        image: box-recommend:latest
+        image: rhlehfndvkd7557/box-recommend:latest
         imagePullPolicy: Always
         # 컨테이너 시작 지연 추가
         command:
