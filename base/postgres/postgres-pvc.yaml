@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: box-recommend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi  # 필요한 용량에 따라 조정
+  storageClassName: standard  # 클러스터에서 사용 가능한 StorageClass에 따라 조정

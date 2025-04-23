@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: box-recommend
+  name: box-recommend-config
+  labels:
+    app: box-recommend
+data:
+  application-prod.yml: |-
+    server:
+      port: 8080
+    
+    logging:
+      level:
+        root: INFO
+        org.tianea.boxrecommend: INFO
