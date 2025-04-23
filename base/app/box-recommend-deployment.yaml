@@ -14,6 +14,10 @@ spec:
     metadata:
       labels:
         app: box-recommend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       containers:
       - name: box-recommend
@@ -66,9 +70,32 @@ spec:
         # 시작 타임아웃 증가
         - name: SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE
           value: "30s"
+        # Actuator 설정
+        - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+          value: "health,info,prometheus,metrics"
+        - name: MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS
+          value: "never"
+        - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+          value: "true"
+        - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+          value: "box-recommend"
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          timeoutSeconds: 5
       volumes:
       - name: config-volume
         configMap:

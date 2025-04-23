@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: 'default'
   datasource:
-    url: jdbc:postgresql://localhost:5432/boxrecommend
+    url: jdbc:postgresql://localhost:5433/boxrecommend
     password: test1234
     username: test1234
     driver-class-name: org.postgresql.Driver
@@ -26,6 +26,22 @@ spring:
       mode: always
 server:
   port: 0  # 개발 환경에서는 랜덤 포트 사용
+
+# Actuator 및 Prometheus 설정
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
 ---
 spring:
   config:
@@ -50,6 +66,22 @@ spring:
       schema-locations: classpath:/db/init.sql
 server:
   port: 0  # 테스트 환경에서도 랜덤 포트 사용
+
+# Actuator 및 Prometheus 설정 (테스트 환경)
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
 ---
 spring:
   config:
@@ -78,3 +110,19 @@ spring:
       mode: never  # 운영 환경에서는 초기 데이터 로드 비활성화
 server:
   port: 8080  # 운영 환경에서는 고정 포트 사용
+
+# Actuator 및 Prometheus 설정 (운영 환경)
+management:
+  endpoint:
+    health:
+      show-details: never  # 운영 환경에서는 상세 정보 숨김
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}

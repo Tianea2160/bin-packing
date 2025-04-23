@@ -7,3 +7,5 @@ resources:
   - argocd/argocd-app.yaml
   - app/box-recommend-app.yaml
   - postgres/box-recommend-postgres-app.yaml
+  - prometheus/box-recommend-prometheus-app.yaml
+  - grafana/box-recommend-grafana-app.yaml
