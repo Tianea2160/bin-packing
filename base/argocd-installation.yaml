@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# ArgoCD 설치를 위한 매니페스트 URL을 적용하는 Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: install-argocd
+  namespace: argocd
+spec:
+  template:
+    spec:
+      serviceAccountName: argocd-installer
+      containers:
+      - name: kubectl
+        image: bitnami/kubectl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      restartPolicy: OnFailure
+  backoffLimit: 2
+---
+# Job에 필요한 ServiceAccount 및 RBAC 권한
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd-installer
+  namespace: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-installer
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-installer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argocd-installer
+subjects:
+- kind: ServiceAccount
+  name: argocd-installer
+  namespace: argocd
