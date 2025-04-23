@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: box-recommend
-        image: rhlehfndvkd7557/box-recommend:latest
+        image: rhlehfndvkd7557/box-recommend:latest-java21
         imagePullPolicy: Always
         # 컨테이너 시작 지연 추가
         command:

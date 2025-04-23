@@ -6,8 +6,8 @@ cd ..
 eval $(minikube docker-env)
 
 # 이미지 빌드
-docker build -t box-recommend:latest .
-docker push box-recommend:latest
+docker build -t rhlehfndvkd7557/box-recommend:latest-java21 .
+docker push rhlehfndvkd7557/box-recommend:latest-java21
 
 # Deployment 재시작하여 새 이미지 사용
 kubectl rollout restart deployment box-recommend --namespace box-recommend
