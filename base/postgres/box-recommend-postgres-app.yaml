@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/refresh: hard
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "0"  # 데이터베이스를 먼저 배포하도록 변경
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default

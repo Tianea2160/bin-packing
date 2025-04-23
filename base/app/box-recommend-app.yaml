@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/refresh: hard
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "1"  # 데이터베이스 배포 후 애플리케이션 배포
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default
@@ -25,6 +25,9 @@ spec:
     automated:
       selfHeal: true
       prune: false
+  # 데이터베이스 애플리케이션에 의존성 추가
+  dependsOn:
+    - name: box-recommend-postgres
   ignoreDifferences:
     - group: apps
       kind: Deployment

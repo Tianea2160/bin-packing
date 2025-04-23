@@ -15,10 +15,33 @@ data:
         root: DEBUG
         org.tianea.boxrecommend: DEBUG
         org.springframework.web: DEBUG
+        org.hibernate.SQL: DEBUG
+        org.hibernate.type.descriptor.sql: TRACE
         
+    # 데이터베이스 연결 관련 설정 추가
+    spring:
+      datasource:
+        hikari:
+          connection-timeout: 30000  # 30초
+          maximum-pool-size: 10
+          minimum-idle: 2
+          idle-timeout: 120000  # 2분
+          max-lifetime: 1800000  # 30분
+          connection-test-query: SELECT 1
+      jpa:
+        properties:
+          hibernate:
+            jdbc:
+              batch_size: 50
+            order_inserts: true
+            order_updates: true
+          
     management:
       endpoint:
         health:
+          enabled: true
+          show-details: always
+        info:
           enabled: true
       endpoints:
         web:
