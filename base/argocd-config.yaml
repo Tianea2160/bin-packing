@@ -25,18 +25,20 @@ data:
     hs.status = "Progressing"
     hs.message = ""
     if obj.status ~= nil then
+      if obj.status.replicas == 0 then
+        hs.status = "Suspended"
+        return hs
+      end
       if obj.status.updatedReplicas ~= nil and obj.status.replicas ~= nil then
-        if obj.status.updatedReplicas == obj.status.replicas and obj.status.availableReplicas == obj.status.replicas then
+        if obj.status.updatedReplicas == obj.status.replicas and obj.status.availableReplicas ~= nil and obj.status.availableReplicas == obj.status.replicas then
           hs.status = "Healthy"
+          return hs
         end
       end
-      if obj.status.conditions ~= nil then
-        for i, condition in ipairs(obj.status.conditions) do
-          if condition.type == "Available" and condition.status == "False" then
-            hs.status = "Degraded"
-            hs.message = condition.message
-          end
-        end
+      if obj.status.unavailableReplicas ~= nil and obj.status.unavailableReplicas > 0 then
+        hs.status = "Degraded"
+        hs.message = string.format("%d/%d pods are unavailable", obj.status.unavailableReplicas, obj.status.replicas)
+        return hs
       end
     end
     return hs
@@ -49,10 +51,12 @@ data:
       if obj.status.succeeded ~= nil and obj.status.succeeded > 0 then
         hs.status = "Healthy"
         hs.message = "Job completed successfully"
+        return hs
       end
       if obj.status.failed ~= nil and obj.status.failed > 0 then
         hs.status = "Degraded"
-        hs.message = "Job has failed"
+        hs.message = string.format("Job has failed %d times", obj.status.failed)
+        return hs
       end
     end
     return hs
@@ -62,15 +66,35 @@ data:
     hs.status = "Progressing"
     hs.message = ""
     if obj.status ~= nil then
-      if obj.status.readyReplicas ~= nil and obj.status.readyReplicas == obj.spec.replicas then
-        hs.status = "Healthy"
-      elseif obj.status.readyReplicas ~= nil then
-        hs.message = string.format("%d/%d pods are ready", obj.status.readyReplicas, obj.spec.replicas)
+      if obj.status.readyReplicas ~= nil and obj.status.currentReplicas ~= nil then
+        if obj.status.readyReplicas == obj.status.currentReplicas and obj.status.readyReplicas == obj.spec.replicas then
+          hs.status = "Healthy"
+          return hs
+        end
       end
     end
     return hs
 
-  resource.customizations.health.networking.k8s.io_Ingress: |
+  resource.customizations.health.v1_Service: |
     hs = {}
     hs.status = "Healthy"
+    return hs
+
+  resource.customizations.health.v1_PersistentVolumeClaim: |
+    hs = {}
+    if obj.status ~= nil and obj.status.phase ~= nil then
+      if obj.status.phase == "Bound" then
+        hs.status = "Healthy"
+        hs.message = "PVC is bound"
+      elseif obj.status.phase == "Pending" then
+        hs.status = "Progressing" 
+        hs.message = "PVC is pending"
+      else
+        hs.status = "Degraded"
+        hs.message = string.format("PVC is in phase: %s", obj.status.phase)
+      end
+    else
+      hs.status = "Unknown"
+      hs.message = "Unable to determine PVC status"
+    end
     return hs

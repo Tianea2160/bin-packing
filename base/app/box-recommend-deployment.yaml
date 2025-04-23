@@ -43,28 +43,27 @@ spec:
               key: password
         - name: JAVA_OPTS
           value: "-Xmx768m -Xms256m"
-        # 준비성 프로브 추가
+        # actuator 대신 기본 경로로 준비성 프로브 수정
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness
+            path: /
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-        # 활성 프로브 추가
+        # 활성 프로브도 기본 경로로 수정
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /
             port: 8080
           initialDelaySeconds: 60
           periodSeconds: 15
           timeoutSeconds: 10
           failureThreshold: 3
-        # 스타트업 프로브 추가
+        # TCP 소켓 프로브로 스타트업 체크
         startupProbe:
-          httpGet:
-            path: /actuator/health
+          tcpSocket:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
