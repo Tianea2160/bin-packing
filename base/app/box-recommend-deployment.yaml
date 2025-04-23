@@ -18,7 +18,7 @@ spec:
       containers:
       - name: box-recommend
         image: box-recommend:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         resources:
@@ -42,33 +42,25 @@ spec:
               name: db-credentials
               key: password
         - name: JAVA_OPTS
-          value: "-Xmx768m -Xms256m"
-        # 간단한 TCP소켓 체크로 변경 (최소 헬스체크)
-        readinessProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3
-          successThreshold: 1
-        # 활성 프로브도 TCP소켓으로 단순화
-        livenessProbe:
+          value: "-Xmx768m -Xms256m -Dlogging.level.root=DEBUG"
+        # 서버 리스닝 주소를 명시적으로 설정
+        - name: SERVER_ADDRESS
+          value: "0.0.0.0"
+        # 서버 포트 명시
+        - name: SERVER_PORT
+          value: "8080"
+        # 시작 타임아웃 증가
+        - name: SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE
+          value: "30s"
+        # 스타트업 프로브만 유지하고 나머지는 비활성화
+        # 스타트업 프로브 타이밍 대폭 조정
+        startupProbe:
           tcpSocket:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 3
-          successThreshold: 1
-        # TCP 소켓 프로브로 스타트업 체크
-        startupProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          timeoutSeconds: 2
-          failureThreshold: 20
+          failureThreshold: 60 # 최대 10분(60*10초) 기다림
           successThreshold: 1
         volumeMounts:
         - name: config-volume
