@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  template:
+    spec:
+      containers:
+      - name: argocd-server
+        args:
+        - /usr/local/bin/argocd-server
+        - --staticassets
+        - /shared/app
+        - --insecure  # 개발 환경에서만 사용, 프로덕션에서는 제거
+        - --cors
+        - --disable-auth  # 개발 환경에서만 사용, 프로덕션에서는 제거해야 함
+        env:
+        - name: ARGOCD_SERVER_CORS_ALLOW_ORIGIN
+          valueFrom:
+            configMapKeyRef:
+              name: argocd-cmd-params-cm
+              key: server.cors.allow-origin
+              optional: true

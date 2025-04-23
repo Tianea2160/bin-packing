@@ -14,3 +14,11 @@ resources:
   - argocd-server-service.yaml
   - argocd-admin-password.yaml
   - argocd-config.yaml
+  - argocd-cmd-params-cm.yaml
+
+# 최신 kustomize 버전에서 권장하는 patches 구문 사용
+patches:
+  - path: argocd-server-deployment-patch.yaml
+    target:
+      kind: Deployment
+      name: argocd-server
