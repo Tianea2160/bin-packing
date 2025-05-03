@@ -1,14 +1,16 @@
 package org.tianea.boxrecommend.domain.recommend.result.document
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.elasticsearch.annotations.DateFormat
 import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import org.tianea.boxrecommend.domain.recommend.result.entity.RecommendResult
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
-@Document(indexName = "bin-pack-recommend-result")
+@Document(
+    indexName = "bin-pack-recommend-result"
+)
 data class BinPackRecommendResult(
     @Id
     val id: String? = null,
@@ -31,8 +33,8 @@ data class BinPackRecommendResult(
     @Field(type = FieldType.Nested)
     val scoreCoordinates: List<ScoreCoordinate>,
 
-    @Field(type = FieldType.Date, format = [DateFormat.basic_date_time])
-    val createdAt: LocalDateTime,
+    @Field(type = FieldType.Date)
+    val createdAt: OffsetDateTime,
 
     @Field(type = FieldType.Nested)
     val skus: List<BinPackSkuDocument>,
@@ -56,7 +58,7 @@ data class BinPackRecommendResult(
                 score = result.score,
                 scoreDescription = scoreDescription,
                 scoreCoordinates = scoreCoordinates,
-                createdAt = result.createdAt,
+                createdAt = result.createdAt.atOffset(ZoneOffset.systemDefault().rules.getOffset(result.createdAt)),
                 skus = skus,
                 assignments = assignments
             )
