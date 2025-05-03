@@ -12,9 +12,16 @@ import java.time.LocalDateTime
 @EntityListeners(AuditingEntityListener::class)
 abstract class BaseTimeEntity(
     @CreatedDate
-    @Column(name = "created_at", updatable = false)
+    @Column(
+        name = "created_at",
+        columnDefinition = "timestamp with time zone",
+        updatable = false,
+    )
     open val createdAt: LocalDateTime = LocalDateTime.now(),
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(
+        name = "updated_at",
+        columnDefinition = "timestamp with time zone",
+    )
     open var updatedAt: LocalDateTime = LocalDateTime.now()
 )

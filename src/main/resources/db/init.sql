@@ -129,3 +129,21 @@ CREATE TABLE IF NOT EXISTS recommend_result_sku
     sku_id              bigint                                              not null,
     recommend_result_id bigint                                              not null
 );
+
+create table if not exists order_sku
+(
+    order_sku_id       bigint not null primary key,
+    created_at         timestamp(6) with time zone,
+    updated_at         timestamp(6) with time zone,
+    order_id           bigint not null,
+    requested_quantity bigint not null,
+    sku_id             bigint not null
+);
+
+create table if not exists orders
+(
+    order_id   bigint       not null primary key,
+    created_at timestamp(6) with time zone,
+    updated_at timestamp(6) with time zone,
+    title      varchar(255) not null
+);

@@ -14,7 +14,7 @@ class OrderSku(
     val id: Long,
     @Column(name = "order_id", nullable = false)
     val orderId: Long,
-    @Column(name = "name", nullable = false)
+    @Column(name = "sku_id", nullable = false)
     val skuId: Long,
     @Column(name = "requested_quantity", nullable = false)
     val requestedQuantity: Long,
