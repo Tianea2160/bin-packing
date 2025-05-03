@@ -30,6 +30,9 @@ spec:
           mountPath: /etc/grafana/provisioning/datasources
         - name: grafana-dashboards
           mountPath: /etc/grafana/provisioning/dashboards
+        - name: grafana-dashboard-configs
+          mountPath: /etc/grafana/provisioning/dashboards/jvm-metrics-dashboard.json
+          subPath: jvm-metrics-dashboard.json
         - name: grafana-storage
           mountPath: /var/lib/grafana
       volumes:
@@ -39,6 +42,9 @@ spec:
       - name: grafana-dashboards
         configMap:
           name: grafana-dashboards
+      - name: grafana-dashboard-configs
+        configMap:
+          name: jvm-metrics-dashboard
       - name: grafana-storage
         emptyDir: {}
 ---
@@ -77,6 +83,208 @@ data:
         options:
           path: /etc/grafana/provisioning/dashboards
           foldersFromFilesStructure: true
+      - name: 'Custom'
+        orgId: 1
+        folder: 'Custom Dashboards'
+        type: file
+        disableDeletion: false
+        allowUiUpdates: true
+        options:
+          path: /etc/grafana/provisioning/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jvm-metrics-dashboard
+  namespace: box-recommend
+data:
+  jvm-metrics-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(jvm_memory_used_bytes{application=\"box-recommend\"}) by (area)",
+              "legendFormat": "{{area}} Used",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum(jvm_memory_max_bytes{application=\"box-recommend\"}) by (area)",
+              "legendFormat": "{{area}} Max",
+              "refId": "B"
+            }
+          ],
+          "title": "JVM Memory Usage",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "text": {}
+          },
+          "pluginVersion": "9.0.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "(sum(jvm_memory_used_bytes{application=\"box-recommend\", area=\"heap\"}) / sum(jvm_memory_max_bytes{application=\"box-recommend\", area=\"heap\"})) * 100",
+              "refId": "A"
+            }
+          ],
+          "title": "Heap Memory Usage %",
+          "type": "gauge"
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "JVM Metrics Dashboard",
+      "uid": "jvm-metrics",
+      "version": 1,
+      "weekStart": ""
+    }
 ---
 apiVersion: v1
 kind: Service

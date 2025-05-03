@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  app:
+    build: .
+    container_name: box-recommend-app
+    depends_on:
+      - postgres
+      - elasticsearch
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=boxrecommend
+      - DB_USERNAME=test1234
+      - DB_PASSWORD=test1234
+      - ELASTICSEARCH_URI=http://elasticsearch:9200
+    restart: unless-stopped
+
   postgres:
     image: postgres:16
     container_name: box-recommend-postgres
@@ -43,6 +61,7 @@ services:
       - "3000:3000"
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
       - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin

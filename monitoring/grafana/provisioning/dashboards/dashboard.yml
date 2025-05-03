@@ -1,7 +1,7 @@
 apiVersion: 1
 
 providers:
-  - name: 'Default'
+  - name: 'default'
     orgId: 1
     folder: ''
     type: file
@@ -9,5 +9,5 @@ providers:
     updateIntervalSeconds: 10
     allowUiUpdates: true
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /var/lib/grafana/dashboards
       foldersFromFilesStructure: true

@@ -10,4 +10,4 @@ scrape_configs:
   - job_name: 'spring-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8080']
+      - targets: ['box-recommend-app:8888']  # Docker 서비스 이름 사용
