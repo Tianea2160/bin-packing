@@ -22,7 +22,9 @@ spring:
       dialect: postgresql
   sql:
     init:
-      schema-locations: classpath:/db/insert_data.sql
+      schema-locations:
+        - classpath:/db/init.sql
+        - classpath:/db/insert_data.sql
       mode: always
 server:
   port: 0  # 개발 환경에서는 랜덤 포트 사용
