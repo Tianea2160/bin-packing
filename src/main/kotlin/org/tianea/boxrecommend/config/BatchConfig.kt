@@ -41,7 +41,6 @@ class BatchConfig(
             // 병렬 처리 비활성화 (moveThreadCount 설정 제거)
             .withTerminationConfig(TerminationConfig().apply {
                 unimprovedSecondsSpentLimit = 3L
-                secondsSpentLimit = 20L
             })
     )
 
