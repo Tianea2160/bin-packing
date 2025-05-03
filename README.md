@@ -33,24 +33,11 @@ Spring Batch를 활용해 자동화된 배치 작업으로 적재 로직을 정�
 - **GitOps 배포**: ArgoCD를 통한 자동화된 배포
 
 ## 시스템 아키텍처
+<img src="https://github.com/user-attachments/assets/08ae1e6a-99ff-4ec0-9a18-5c6514862c4f" width=500>
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Spring Boot   │────▶│    OptaPlanner  │────▶│     결과 저장     │
-│  Application    │     │   Bin Packing   │     │ PostgreSQL      │
-│                 │     │     Engine      │     │ Elasticsearch   │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-         ▲                                              │
-         │                                              │
-         │                                              ▼
-┌─────────────────┐                          ┌─────────────────┐
-│  REST API       │                          │   Monitoring    │
-│  Swagger UI     │                          │ Grafana/Prometheus│
-└─────────────────┘                          └─────────────────┘
-```
 
 ## 기능 순서도
-<img  src="https://github.com/user-attachments/assets/2e5c8589-b021-4ea8-9308-7a0f863bd8e9" width=500>
+<img src="https://github.com/user-attachments/assets/2e5c8589-b021-4ea8-9308-7a0f863bd8e9" width=500>
 
 ## 사용 기술
 
