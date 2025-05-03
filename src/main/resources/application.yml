@@ -33,6 +33,29 @@ spring:
 server:
   port: 8888  # 개발 환경에서는 랜덤 포트 사용
 
+# Swagger/OpenAPI 3 설정
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    doc-expansion: none
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    display-request-duration: true
+    disable-swagger-default-url: true
+  api-docs:
+    path: /api-docs
+    enabled: true
+  show-actuator: true
+  enable-spring-security: false
+  paths-to-match: /**
+  paths-to-exclude:
+    - /error
+    - /actuator/**
+  override-with-generic-response: false
+
 # Actuator 및 Prometheus 설정
 management:
   endpoint:
@@ -95,6 +118,13 @@ spring:
   config:
     activate:
       on-profile: 'prod'
+
+# Production 환경에서 Swagger 설정
+springdoc:
+  swagger-ui:
+    enabled: false  # Production에서는 Swagger UI 비활성화
+  api-docs:
+    enabled: false  # Production에서는 API 문서 비활성화
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:boxrecommend}  # 환경 변수 또는 기본값으로 설정
     password: ${DB_PASSWORD:test1234}  # 환경 변수 또는 기본값

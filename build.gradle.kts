@@ -35,6 +35,9 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     
+    // Swagger/OpenAPI 3 의존성 추가
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
+    
     // Spring Boot 3.4.4와 호환되는 Elasticsearch 의존성
     implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
