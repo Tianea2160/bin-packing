@@ -20,6 +20,10 @@ spring:
   data:
     jdbc:
       dialect: postgresql
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: changeme  # 개발 환경용 비밀번호
   sql:
     init:
       schema-locations:
@@ -27,7 +31,7 @@ spring:
         - classpath:/db/insert_data.sql
       mode: always
 server:
-  port: 0  # 개발 환경에서는 랜덤 포트 사용
+  port: 8888  # 개발 환경에서는 랜덤 포트 사용
 
 # Actuator 및 Prometheus 설정
 management:
@@ -39,11 +43,12 @@ management:
       exposure:
         include: health,info,prometheus,metrics
   metrics:
-    export:
-      prometheus:
-        enabled: true
     tags:
       application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 ---
 spring:
   config:
@@ -79,11 +84,12 @@ management:
       exposure:
         include: health,info,prometheus,metrics
   metrics:
-    export:
-      prometheus:
-        enabled: true
     tags:
       application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 ---
 spring:
   config:
@@ -107,6 +113,10 @@ spring:
   data:
     jdbc:
       dialect: postgresql
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:changeme}
   sql:
     init:
       mode: never  # 운영 환경에서는 초기 데이터 로드 비활성화
@@ -123,8 +133,9 @@ management:
       exposure:
         include: health,info,prometheus,metrics
   metrics:
-    export:
-      prometheus:
-        enabled: true
     tags:
       application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true

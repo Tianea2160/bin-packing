@@ -3,10 +3,11 @@ package org.tianea.boxrecommend.core.writer
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.Chunk
 import org.springframework.batch.item.support.ListItemWriter
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import org.tianea.boxrecommend.core.vo.Bin
+import org.tianea.boxrecommend.core.event.RecommendResultSavedEvent
+import org.tianea.boxrecommend.core.event.SkuInfo
 import org.tianea.boxrecommend.core.vo.BinPackingSolution
-import org.tianea.boxrecommend.core.vo.ItemAssignment
 import org.tianea.boxrecommend.domain.recommend.result.entity.RecommendResult
 import org.tianea.boxrecommend.domain.recommend.result.entity.RecommendResultSku
 import org.tianea.boxrecommend.domain.recommend.result.entity.RecommendStatus
@@ -17,6 +18,7 @@ import org.tianea.boxrecommend.domain.recommend.result.repository.RecommendResul
 class BinPackingItemWriter(
     private val recommendResultRepository: RecommendResultRepository,
     private val recommendResultSkuRepository: RecommendResultSkuRepository,
+    private val eventPublisher: ApplicationEventPublisher,
 ) : ListItemWriter<BinPackingSolution>() {
     private val logger = LoggerFactory.getLogger(BinPackingItemWriter::class.java)
 
@@ -27,6 +29,7 @@ class BinPackingItemWriter(
         chunk.forEach { solution ->
             val successfulAssignments = solution.assignments.filter { it.bin != null }
 
+            // PostgreSQL에 저장
             val result = RecommendResult(
                 id = null,
                 solutionId = solution.id,
@@ -34,20 +37,26 @@ class BinPackingItemWriter(
                 status = if (solution.isFeasible()) RecommendStatus.SUCCESS else RecommendStatus.FAILURE,
                 score = solution.score.hardScores().sum().toLong()
             )
-            recommendResultRepository.save(result)
+            val savedResult = recommendResultRepository.save(result)
 
             val skus = successfulAssignments
                 .groupBy { it.item.id }
                 .map { (skuId, list) ->
                     RecommendResultSku(
                         id = null,
-                        recommendResultId = result.id ?: -1,
+                        recommendResultId = savedResult.id ?: -1,
                         skuId = skuId,
                         quantity = 1
                     )
                 }
                 .toMutableList()
             recommendResultSkuRepository.saveAll(skus)
+
+            // 이벤트 발행 (비동기로 Elasticsearch 저장)
+            val skuInfos = skus.map { SkuInfo(it.skuId, it.quantity) }
+            eventPublisher.publishEvent(RecommendResultSavedEvent(savedResult, skuInfos))
+            
+            logger.info("Published event for recommend result ${savedResult.id}")
         }
     }
 }
