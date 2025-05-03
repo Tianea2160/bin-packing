@@ -23,7 +23,7 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
     username: elastic
-    password: changeme  # 개발 환경용 비밀번호
+    password: changeme
   sql:
     init:
       schema-locations:
@@ -31,9 +31,8 @@ spring:
         - classpath:/db/insert_data.sql
       mode: always
 server:
-  port: 8888  # 개발 환경에서는 랜덤 포트 사용
+  port: 8888
 
-# Swagger/OpenAPI 3 설정
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -118,24 +117,17 @@ spring:
   config:
     activate:
       on-profile: 'prod'
-
-# Production 환경에서 Swagger 설정
-springdoc:
-  swagger-ui:
-    enabled: false  # Production에서는 Swagger UI 비활성화
-  api-docs:
-    enabled: false  # Production에서는 API 문서 비활성화
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:boxrecommend}  # 환경 변수 또는 기본값으로 설정
-    password: ${DB_PASSWORD:test1234}  # 환경 변수 또는 기본값
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:boxrecommend}
+    password: ${DB_PASSWORD:test1234}
     username: ${DB_USERNAME:test1234}
     driver-class-name: org.postgresql.Driver
   application:
     name: box-recommend
   jpa:
-    show-sql: false  # 운영 환경에서는 SQL 로깅 비활성화
+    show-sql: false
     hibernate:
-      ddl-auto: none  # 운영 환경에서는 스키마 자동 생성 비활성화
+      ddl-auto: none
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       hibernate:
@@ -149,15 +141,13 @@ springdoc:
     password: ${ELASTICSEARCH_PASSWORD:changeme}
   sql:
     init:
-      mode: never  # 운영 환경에서는 초기 데이터 로드 비활성화
+      mode: never
 server:
-  port: 8080  # 운영 환경에서는 고정 포트 사용
-
-# Actuator 및 Prometheus 설정 (운영 환경)
+  port: 8080
 management:
   endpoint:
     health:
-      show-details: never  # 운영 환경에서는 상세 정보 숨김
+      show-details: never
   endpoints:
     web:
       exposure:
