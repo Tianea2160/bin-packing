@@ -97,8 +97,9 @@ cd script
 
 ### Grafana 대시보드
 JVM 메트릭 모니터링을 통해 애플리케이션 상태를 실시간으로 확인할 수 있습니다.
+<img width="1402" alt="스크린샷 2025-05-03 오후 6 16 54" src="https://github.com/user-attachments/assets/d7199ff5-15ee-412e-93a9-091dec717c14" />
 
-<img width="1265" alt="Grafana Dashboard" src="https://github.com/user-attachments/assets/grafana-dashboard.png" />
+
 
 ### 주요 모니터링 지표
 - JVM 메모리 사용량
