@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 import org.tianea.boxrecommend.domain.recommend.result.document.BinPackRecommendResult
 import org.tianea.boxrecommend.domain.recommend.result.util.IndexNameGenerator
 
-@Repository
+
 class BinPackRecommendResultCustomRepositoryImpl(
     private val operations: ElasticsearchOperations
 ) : BinPackRecommendResultCustomRepository {

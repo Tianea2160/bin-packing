@@ -2,6 +2,7 @@ package org.tianea.boxrecommend.config
 
 
 import org.optaplanner.core.api.solver.SolverFactory
+import org.optaplanner.core.api.solver.SolutionManager
 import org.optaplanner.core.config.solver.SolverConfig
 import org.optaplanner.core.config.solver.termination.TerminationConfig
 import org.springframework.batch.core.Job
@@ -42,6 +43,11 @@ class BatchConfig(
                 unimprovedSecondsSpentLimit = 3L
             })
     )
+
+    @Bean
+    fun solutionManager(solverFactory: SolverFactory<BinPackingSolution>): SolutionManager<BinPackingSolution, org.optaplanner.core.api.score.buildin.bendable.BendableScore> {
+        return SolutionManager.create(solverFactory)
+    }
 
     @Bean
     fun taskExecutor(): TaskExecutor {

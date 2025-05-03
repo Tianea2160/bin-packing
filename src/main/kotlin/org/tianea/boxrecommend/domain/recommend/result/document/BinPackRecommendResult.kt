@@ -24,22 +24,40 @@ data class BinPackRecommendResult(
     @Field(type = FieldType.Long)
     val score: Long?,
     
+    @Field(type = FieldType.Text)
+    val scoreDescription: String,
+    
+    @Field(type = FieldType.Nested)
+    val scoreCoordinates: List<ScoreCoordinate>,
+    
     @Field(type = FieldType.Date)
     val createdAt: LocalDateTime,
     
     @Field(type = FieldType.Nested)
-    val skus: List<BinPackSkuDocument>
+    val skus: List<BinPackSkuDocument>,
+    
+    @Field(type = FieldType.Nested)
+    val assignments: List<AssignmentDetail>
 ) {
     companion object {
-        fun from(result: RecommendResult, skus: List<BinPackSkuDocument>): BinPackRecommendResult {
+        fun from(
+            result: RecommendResult, 
+            skus: List<BinPackSkuDocument>,
+            scoreDescription: String,
+            scoreCoordinates: List<ScoreCoordinate>,
+            assignments: List<AssignmentDetail>
+        ): BinPackRecommendResult {
             return BinPackRecommendResult(
                 id = result.id?.toString(),
                 solutionId = result.solutionId,
                 recommendedBinId = result.recommendedBinId,
                 status = result.status.name,
                 score = result.score,
+                scoreDescription = scoreDescription,
+                scoreCoordinates = scoreCoordinates,
                 createdAt = result.createdAt,
-                skus = skus
+                skus = skus,
+                assignments = assignments
             )
         }
     }

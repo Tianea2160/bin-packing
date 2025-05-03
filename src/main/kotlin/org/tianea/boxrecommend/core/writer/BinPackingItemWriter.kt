@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 import org.tianea.boxrecommend.core.event.RecommendResultSavedEvent
 import org.tianea.boxrecommend.core.event.SkuInfo
+import org.tianea.boxrecommend.core.util.ScoreDetailExtractor
 import org.tianea.boxrecommend.core.vo.BinPackingSolution
 import org.tianea.boxrecommend.domain.recommend.result.entity.RecommendResult
 import org.tianea.boxrecommend.domain.recommend.result.entity.RecommendResultSku
@@ -19,6 +20,7 @@ class BinPackingItemWriter(
     private val recommendResultRepository: RecommendResultRepository,
     private val recommendResultSkuRepository: RecommendResultSkuRepository,
     private val eventPublisher: ApplicationEventPublisher,
+    private val scoreDetailExtractor: ScoreDetailExtractor,
 ) : ListItemWriter<BinPackingSolution>() {
     private val logger = LoggerFactory.getLogger(BinPackingItemWriter::class.java)
 
@@ -52,9 +54,20 @@ class BinPackingItemWriter(
                 .toMutableList()
             recommendResultSkuRepository.saveAll(skus)
 
+            // Score breakdown과 assignments 정보 추출
+            val (scoreDescription, scoreCoordinates) = scoreDetailExtractor.extractScoreCoordinates(solution)
+            val assignmentDetails = scoreDetailExtractor.extractAssignmentDetails(solution)
+
             // 이벤트 발행 (비동기로 Elasticsearch 저장)
             val skuInfos = skus.map { SkuInfo(it.skuId, it.quantity) }
-            eventPublisher.publishEvent(RecommendResultSavedEvent(savedResult, skuInfos))
+            eventPublisher.publishEvent(RecommendResultSavedEvent(
+                recommendResult = savedResult,
+                skus = skuInfos,
+                solution = solution,
+                scoreDescription = scoreDescription,
+                scoreCoordinates = scoreCoordinates,
+                assignments = assignmentDetails
+            ))
             
             logger.info("Published event for recommend result ${savedResult.id}")
         }

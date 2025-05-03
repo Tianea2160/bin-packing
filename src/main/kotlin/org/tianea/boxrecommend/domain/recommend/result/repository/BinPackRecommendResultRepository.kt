@@ -7,8 +7,7 @@ import org.tianea.boxrecommend.domain.recommend.result.document.BinPackRecommend
 @Repository
 interface BinPackRecommendResultRepository :
     ElasticsearchRepository<BinPackRecommendResult, String>,
-    BinPackRecommendResultCustomRepository {
-}
+    BinPackRecommendResultCustomRepository
 
 // 날짜별 조회를 위한 전용 리포지토리 추가
 interface BinPackRecommendResultCustomRepository {
